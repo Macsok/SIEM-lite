@@ -1,6 +1,12 @@
 # SIEM-lite
 ...
 
+# Setting up
+Retrieve required images:
+```sh
+docker pull docker.elastic.co/elasticsearch/elasticsearch:7.5.2
+```
+
 # Notes
 ElasticSearch on dockerhub: https://hub.docker.com/_/elasticsearch
 
