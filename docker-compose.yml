@@ -4,11 +4,11 @@ services:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.11.3
     container_name: elasticsearch
     environment:
-      - discovery.type= 'single-node'
+      - discovery.type=single-node
       - xpack.security.enabled=false
       - xpack.security.transport.ssl.enabled=false
-      - bootstrap.memory_lock= 'true'
-      - ES_JAVA_OPTS= '-Xms1g -Xmx1g'
+      - bootstrap.memory_lock=true
+      - ES_JAVA_OPTS=-Xms1g -Xmx1g  # Usunięte zbędne spacje
     ulimits:
       memlock:
         soft: -1
@@ -17,7 +17,8 @@ services:
       - "9200:9200"
     volumes:
       - esdata:/usr/share/elasticsearch/data
-
+    networks:
+      - mynetwork
 
   logstash:
     image: docker.elastic.co/logstash/logstash:8.11.3
@@ -29,6 +30,12 @@ services:
       - ./logs:/usr/share/logstash/logs
     depends_on:
       - elasticsearch
+    networks:
+      - mynetwork
 
 volumes:
   esdata:
+
+networks:
+  mynetwork:
+    driver: bridge
