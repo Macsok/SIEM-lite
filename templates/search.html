@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>Wyszukiwarka Elasticsearch</title>
+    <style>
+        body { font-family: sans-serif; padding: 2rem; max-width: 800px; margin: auto; }
+        input[type="text"] { width: 70%; padding: 0.5rem; }
+        button { padding: 0.5rem 1rem; }
+        .result { border: 1px solid #ccc; margin-top: 1rem; padding: 1rem; border-radius: 8px; }
+        .title { font-weight: bold; margin-bottom: 0.5rem; }
+        .index { font-size: 0.9em; color: gray; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Wyszukiwanie w Elasticsearch (wszystkie indeksy)</h1>
+    <form method="get">
+        <input type="text" name="q" value="{{ query }}" placeholder="Wpisz zapytanie..." />
+        <button type="submit">Szukaj</button>
+    </form>
+
+    {% if results %}
+        <h2>Wyniki:</h2>
+        {% for item in results %}
+            <div class="result">
+                <div class="index">Indeks: {{ item._index }}</div>
+                <div class="title">{{ item._source.title or "(brak tytułu)" }}</div>
+                <div>{{ item._source.content or "(brak treści)" }}</div>
+            </div>
+        {% endfor %}
+    {% elif query %}
+        <p>Brak wyników dla zapytania: <strong>{{ query }}</strong></p>
+    {% endif %}
+</body>
+</html>
