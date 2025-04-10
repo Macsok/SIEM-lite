@@ -12,6 +12,7 @@ def search():
     use_regex = False
     results = []
     error = None
+    size = 10
 
     if request.method == "POST":
         query = request.form.get("query", "")
@@ -27,7 +28,7 @@ def search():
             payload = {
                 "query": {
                     "query_string": {
-                        "fields": [field],
+                        "default_field ": field,
                         "query": query
                     }
                 },
@@ -37,7 +38,7 @@ def search():
             payload = {
                 "query": {
                     "query_string": {
-                        "query": query
+                        "query": '"' + query + '"'
                     }
                 },
                 "size": int(size)
@@ -51,7 +52,7 @@ def search():
         except Exception as e:
             error = f"Error querying Elasticsearch: {e}"
 
-    return render_template("search.html", query=query, field=field, use_regex=use_regex, results=results, error=error)
+    return render_template("search.html", query=query, field=field, size=size, use_regex=use_regex, results=results, error=error)
 
 if __name__ == "__main__":
     app.run(debug=True)
