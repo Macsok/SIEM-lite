@@ -33,7 +33,7 @@ curl -X GET "http://localhost:9200/loghub-logs-*/_search?pretty" -H 'Content-Typ
 - Replace `field_name` with the field you want to search.
 - Replace `search_term` with the term you are looking for.
 
-### Example
+### Example Linux formatting
 To search for documents where the `Content` field contains the phrase "brute force attack":
 ```
 curl -X GET "http://localhost:9200/loghub-logs-*/_search?pretty" -H 'Content-Type: application/json' -d'
