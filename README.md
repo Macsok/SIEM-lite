@@ -45,7 +45,7 @@ curl -X GET "http://localhost:9200/loghub-logs-*/_search?pretty" -H 'Content-Typ
   }
 }'
 ```
-### Example
+### Windows CMD formatting:
 To search for documents where the `Content` field contains the phrase "brute force attack" formatting for Windows CMD:
 ```
 curl -X GET "http://localhost:9200/loghub-logs-*/_search?pretty" -H "Content-Type: application/json" -d "{\"query\": {\"match_phrase\": {\"Content\": \"ftpd\"}}}"
