@@ -12,7 +12,7 @@ def load_logs(csv_path="logs/Linux/Linux_2k.log_structured.csv"):
 
         if "authentication failure" in content:
             alerts.append({
-                "type": "Brute Force Attempt",
+                "type": "Authentication failure",
                 "severity": "high",
                 "time": f"{row['Month']} {row['Date']} {row['Time']}",
                 "message": row["Content"],
