@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Security Alerts</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -81,8 +83,25 @@
                 <div class="severity {{ alert.severity|lower }}">{{ alert.severity }}</div>
                 <div class="time">{{ alert.time }}</div>
                 <div class="message">{{ alert.message }}</div>
+                <button class="btn btn-outline-primary btn-sm mt-2" onclick="showAlertDetails({{ alert | tojson }}, {{ loop.index0 }})">
+                Details
+                </button>
             </div>
         {% endfor %}
+
+        <div class="modal fade" id="alertModal" tabindex="-1" aria-labelledby="alertModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-scrollable">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Szczegóły alertu</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Zamknij"></button>
+                    </div>
+                    <div class="modal-body" id="modalBody">
+            <!-- Tutaj da sie jakies szczegóły -->
+                    </div>
+                </div>
+            </div>
+        </div>
     {% else %}
         <p>Brak wykrytych alertów.</p>
     {% endif %}

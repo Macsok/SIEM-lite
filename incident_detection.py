@@ -15,7 +15,9 @@ def load_logs(csv_path="logs/Linux/Linux_2k.log_structured.csv"):
                 "type": "Brute Force Attempt",
                 "severity": "high",
                 "time": f"{row['Month']} {row['Date']} {row['Time']}",
-                "message": row["Content"]
+                "message": row["Content"],
+                "status": "open",
+                "Note": None
             })
 
         if "user unknown" in content:
