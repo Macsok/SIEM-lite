@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request
 import requests
+from incident_detection import load_logs
 
 app = Flask(__name__)
 
@@ -44,6 +45,12 @@ def search():
             error = f"Error querying Elasticsearch: {e}"
 
     return render_template("search.html", query=query, results=results, error=error)
+
+@app.route("/alerts")
+def alerts():
+    alerts = load_logs("logs/Linux/Linux_2k.log_structured.csv")
+    return render_template("alerts.html", alerts=alerts)
+
 
 if __name__ == "__main__":
     app.run(debug=True)

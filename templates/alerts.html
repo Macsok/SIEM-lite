@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Security Alerts</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 2rem;
+            max-width: 70vw;
+            margin: auto;
+            background-color: #f9f9f9;
+            color: #333;
+        }
+
+        h1 {
+            text-align: center;
+            color: #b30000;
+        }
+
+        .alert {
+            background: #fff;
+            border: 1px solid #ddd;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .alert .type {
+            font-weight: bold;
+            font-size: 1.1em;
+            margin-bottom: 0.5rem;
+        }
+
+        .alert .severity {
+            font-weight: bold;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.9em;
+            display: inline-block;
+        }
+
+        .alert .severity.high {
+            background-color: #ffcccc;
+            color: #b30000;
+        }
+
+        .alert .severity.medium {
+            background-color: #ffeeba;
+            color: #856404;
+        }
+
+        .alert .severity.low {
+            background-color: #cce5ff;
+            color: #004085;
+        }
+
+        .alert .time {
+            font-size: 0.85em;
+            color: #555;
+        }
+
+        .alert .message {
+            margin-top: 0.5rem;
+            font-family: monospace;
+            background: #f4f4f4;
+            padding: 0.5rem;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <h1>ALERTS</h1>
+
+    {% if alerts %}
+        {% for alert in alerts %}
+            <div class="alert">
+                <div class="type">{{ alert.type }}</div>
+                <div class="severity {{ alert.severity|lower }}">{{ alert.severity }}</div>
+                <div class="time">{{ alert.time }}</div>
+                <div class="message">{{ alert.message }}</div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>Brak wykrytych alertów.</p>
+    {% endif %}
+</body>
+</html>
