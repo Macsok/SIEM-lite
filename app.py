@@ -1,6 +1,7 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, jsonify
 import requests
 from incident_detection import load_logs
+from llm_utils import analyze_log_with_llm
 
 app = Flask(__name__)
 
@@ -60,6 +61,21 @@ def alerts():
     alerts = load_logs("logs/Linux/Linux_2k.log_structured.csv")
     return render_template("alerts.html", alerts=alerts)
 
+
+@app.route('/analyze', methods=['POST'])
+def analyze_endpoint():
+    try:
+        data = request.get_json()
+        log_text = data.get('log_text', '')
+
+        if not log_text:
+            return jsonify({"error": "Brak log_text w żądaniu"}), 400
+
+        analysis = analyze_log_with_llm(log_text)  # Wywołanie zgodnej funkcji
+        return jsonify({"analysis": analysis})
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
     app.run(debug=True)

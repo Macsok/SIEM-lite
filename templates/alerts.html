@@ -84,11 +84,15 @@
                 <div class="time">{{ alert.time }}</div>
                 <div class="message">{{ alert.message }}</div>
                 <button class="btn btn-outline-primary btn-sm mt-2" onclick="showAlertDetails({{ alert | tojson }}, {{ loop.index0 }})">
-                Details
+                    Details
+                </button>
+                <button class="btn btn-outline-danger btn-sm mt-2" onclick="analyzeLog(`{{ alert.message }}`)">
+                    🔍 Analizuj
                 </button>
             </div>
         {% endfor %}
 
+        <!-- Modal for alert details -->
         <div class="modal fade" id="alertModal" tabindex="-1" aria-labelledby="alertModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-lg modal-dialog-scrollable">
                 <div class="modal-content">
@@ -97,7 +101,22 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Zamknij"></button>
                     </div>
                     <div class="modal-body" id="modalBody">
-            <!-- Tutaj da sie jakies szczegóły -->
+                        <!-- Szczegóły zostaną wczytane dynamicznie -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal for LLM analysis -->
+        <div class="modal fade" id="llmModal" tabindex="-1" aria-labelledby="llmModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-scrollable">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Analiza LLM</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Zamknij"></button>
+                    </div>
+                    <div class="modal-body" id="llmAnalysisContent">
+                        Trwa analiza...
                     </div>
                 </div>
             </div>
@@ -105,5 +124,43 @@
     {% else %}
         <p>Brak wykrytych alertów.</p>
     {% endif %}
+
+    <script>
+        function showAlertDetails(alert, index) {
+            const modalBody = document.getElementById("modalBody");
+            modalBody.innerHTML = `
+                <p><strong>Typ:</strong> ${alert.type}</p>
+                <p><strong>Poziom:</strong> ${alert.severity}</p>
+                <p><strong>Czas:</strong> ${alert.time}</p>
+                <pre><code>${alert.message}</code></pre>
+            `;
+            const modal = new bootstrap.Modal(document.getElementById("alertModal"));
+            modal.show();
+        }
+
+        function analyzeLog(logText) {
+            const contentDiv = document.getElementById("llmAnalysisContent");
+            contentDiv.innerHTML = "Trwa analiza...";
+            const modal = new bootstrap.Modal(document.getElementById("llmModal"));
+            modal.show();
+
+            fetch("/analyze", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ log: logText })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.analysis) {
+                    contentDiv.innerText = data.analysis;
+                } else {
+                    contentDiv.innerText = "Błąd: " + (data.error || "nieznany");
+                }
+            })
+            .catch(err => {
+                contentDiv.innerText = "Błąd podczas żądania do serwera.";
+            });
+        }
+    </script>
 </body>
 </html>
