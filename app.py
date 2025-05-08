@@ -7,6 +7,10 @@ app = Flask(__name__)
 
 ELASTIC_URL = "http://localhost:9200/loghub-logs-*/_search"
 
+@app.route("/home")
+def home():
+    return render_template("home.html")
+
 @app.route("/", methods=["GET", "POST"])
 def search():
     query = ""
@@ -29,9 +33,12 @@ def search():
         if field:
             payload = {
                 "query": {
-                    "query_string": {
-                        "default_field ": field,
-                        "query": query
+                    # "query_string": {
+                    #     "default_field": field,
+                    #     "query": query
+                    # }
+                    "term": {
+                        f"{field}": query
                     }
                 },
                 "size": int(size)
