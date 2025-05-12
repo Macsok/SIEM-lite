@@ -3,11 +3,17 @@ import requests
 
 import sys
 import os
-sys.path.append(os.path.join(os.path.dirname(__file__), '../scripts'))
-from incident_detection import load_logs
-from llm_utils import analyze_log_with_llm
 
-app = Flask(__name__)
+# Konfiguracja ścieżek
+SCRIPT_DIR = os.path.join(os.path.dirname(__file__), 'scripts')
+TEMPLATE_DIR = os.path.join(os.path.dirname(__file__), 'web', 'templates')
+
+sys.path.append(SCRIPT_DIR)
+
+from scripts.incident_detection import load_logs
+from scripts.llm_utils import analyze_log_with_llm
+
+app = Flask(__name__, template_folder=TEMPLATE_DIR)
 
 ELASTIC_URL = "http://localhost:9200/loghub-logs-*/_search"
 
