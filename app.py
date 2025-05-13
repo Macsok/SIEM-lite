@@ -17,11 +17,14 @@ app = Flask(__name__, template_folder=TEMPLATE_DIR)
 
 ELASTIC_URL = "http://localhost:9200/loghub-logs-*/_search"
 
+@app.route("/", methods=["GET"])
+def start_view():
+    return render_template("home.html")
 @app.route("/home")
 def home():
     return render_template("home.html")
 
-@app.route("/", methods=["GET", "POST"])
+@app.route("/search", methods=["GET", "POST"])
 def search():
     query = ""
     field = ""
@@ -96,3 +99,4 @@ def analyze_endpoint():
 
 def run_app():
     app.run(debug=True)
+
