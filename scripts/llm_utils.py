@@ -1,37 +1,35 @@
-from transformers import GPT2LMHeadModel, GPT2Tokenizer
+from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 import torch
 
-# Inicjalizacja modelu
 _tokenizer = None
+_model = None
 
 
 def init_llm():
-    global _model, _tokenizer
-    if _model is None:
-        model_name = "distilgpt2"  # Lżejsza wersja GPT-2
-        _tokenizer = GPT2Tokenizer.from_pretrained(model_name)
-        _model = GPT2LMHeadModel.from_pretrained(model_name, torch_dtype=torch.float16)
-        _tokenizer.pad_token = _tokenizer.eos_token
+    global _tokenizer, _model
+    if _tokenizer is None or _model is None:
+        model_name = "google/flan-t5-small"
+        _tokenizer = AutoTokenizer.from_pretrained(model_name)
+        _model = AutoModelForSeq2SeqLM.from_pretrained(model_name)
 
 
-def analyze_log_with_llm(log_text: str, max_tokens: int = 100) -> str:
+def analyze_log_with_llm(log_text: str, max_tokens: int = 200) -> str:
     init_llm()
 
+#mprompt dla modelu
     prompt = f"""
-    [Analiza SOC] Oceń następujący log:
-    1. Poziom zagrożenia: (niskie/średnie/wysokie)
-    2. Opis zdarzenia: 
-    3. Zalecane działania:
+    The following system logs have been detected:
 
-    Log: {log_text}
-    """
+    {log_text}
+
+    Please provide a list of recommendations for the SOC administrator:
+
+    - What do these events mean?
+    - What are the potential threats?
+    - What actions should be taken?
+        """
 
     inputs = _tokenizer(prompt, return_tensors="pt", truncation=True, max_length=512)
-    outputs = _model.generate(
-        inputs["input_ids"],
-        attention_mask=inputs["attention_mask"],
-        max_new_tokens=max_tokens,
-        pad_token_id=_tokenizer.eos_token_id
-    )
+    outputs = _model.generate(**inputs, max_new_tokens=max_tokens)
 
     return _tokenizer.decode(outputs[0], skip_special_tokens=True)

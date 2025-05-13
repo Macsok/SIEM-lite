@@ -24,6 +24,16 @@ def start_view():
 def home():
     return render_template("home.html")
 
+@app.route("/file")
+def file_selection():
+    # Path to the folder where your log files are stored
+    logs_folder = os.path.join(os.path.dirname(__file__), "logs")
+
+    # Get the list of log files in the folder
+    available_files = [f for f in os.listdir(logs_folder) if os.path.isfile(os.path.join(logs_folder, f))]
+
+    return render_template("file.html", files=available_files)
+
 @app.route("/search", methods=["GET", "POST"])
 def search():
     query = ""
@@ -82,20 +92,25 @@ def alerts():
     return render_template("alerts.html", alerts=alerts)
 
 
-@app.route('/analyze', methods=['POST'])
-def analyze_endpoint():
-    try:
-        data = request.get_json()
-        log_text = data.get('log_text', '')
+@app.route("/analyze", methods=["GET", "POST"])
+def recommendations_view():
+    if request.method == "POST":
+        try:
+            # Ładujemy logi z pliku (zmień ścieżkę na odpowiednią)
+            alerts = load_logs("logs/Linux/Linux_2k.log_structured.csv")
 
-        if not log_text:
-            return jsonify({"error": "Brak log_text w żądaniu"}), 400
+            # Wytwarzamy prompt na podstawie alertów
+            log_text = "\n".join([alert["message"] for alert in alerts])
 
-        analysis = analyze_log_with_llm(log_text)  # Wywołanie zgodnej funkcji
-        return jsonify({"analysis": analysis})
+            # Wysyłamy logi do LLM
+            analysis = analyze_log_with_llm(log_text)  # Wykorzystanie funkcji analizy
 
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+            return render_template("analyze.html", recommendations=analysis)
+        except Exception as e:
+            return render_template("analyze.html", error=f"Error: {str(e)}")
+
+    # W przypadku GET, po prostu renderujemy pustą stronę
+    return render_template("analyze.html")
 
 def run_app():
     app.run(debug=True)

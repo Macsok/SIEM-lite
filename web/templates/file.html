@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block title %}File{% endblock %}
+
+{% block content %}
+<h1>Choose file</h1>
+<p>Choose a log file to analyze.</p>
+
+<label for="files">Choose a file:</label>
+<select name="files" id="files">
+    {% for file in files %}
+        <option value="{{ file }}">{{ file }}</option>
+    {% endfor %}
+</select>
+{% endblock %}
