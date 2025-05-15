@@ -12,6 +12,7 @@ sys.path.append(SCRIPT_DIR)
 
 from scripts.incident_detection import load_logs
 from scripts.llm_utils import analyze_log_with_llm
+from google import genai
 
 app = Flask(__name__, template_folder=TEMPLATE_DIR)
 
@@ -24,15 +25,40 @@ def start_view():
 def home():
     return render_template("home.html")
 
-@app.route("/file")
+
+@app.route("/file", methods=["GET", "POST"])
 def file_selection():
     # Path to the folder where your log files are stored
     logs_folder = os.path.join(os.path.dirname(__file__), "logs")
-
-    # Get the list of log files in the folder
-    available_files = [f for f in os.listdir(logs_folder) if os.path.isfile(os.path.join(logs_folder, f))]
-
-    return render_template("file.html", files=available_files)
+    
+    # Get all log files recursively from the logs directory
+    available_files = []
+    for root, _, files in os.walk(logs_folder):
+        for file in files:
+            # Get relative path to make it easier to display
+            rel_path = os.path.relpath(os.path.join(root, file), logs_folder)
+            available_files.append(rel_path)
+    
+    logs = []
+    selected_file = None
+    
+    if request.method == "POST":
+        selected_file = request.form.get("selected_file")
+        if selected_file:
+            file_path = os.path.join(logs_folder, selected_file)
+            try:
+                # Check if this is a structured CSV file
+                if selected_file.endswith('.csv'):
+                    logs = load_logs(file_path)
+                else:
+                    # For raw text log files
+                    with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
+                        log_lines = f.readlines()
+                        logs = [{"Content": line.strip()} for line in log_lines]
+            except Exception as e:
+                logs = [{"Error": f"Failed to load logs: {str(e)}"}]
+    
+    return render_template("file.html", files=available_files, logs=logs, selected_file=selected_file)
 
 @app.route("/search", methods=["GET", "POST"])
 def search():
@@ -92,25 +118,80 @@ def alerts():
     return render_template("alerts.html", alerts=alerts)
 
 
-@app.route("/analyze", methods=["GET", "POST"])
-def recommendations_view():
+@app.route("/analysis", methods=["GET", "POST"])
+def analysis():
+    # Implement your analysis view
+    return render_template("analysis.html")
+
+@app.route("/test_AI", methods=["GET", "POST"])
+def test_ai():
+    # Path to the folder where your log files are stored
+    logs_folder = os.path.join(os.path.dirname(__file__), "logs")
+    
+    # Get all log files recursively from the logs directory
+    available_files = []
+    for root, _, files in os.walk(logs_folder):
+        for file in files:
+            # Get relative path to make it easier to display
+            rel_path = os.path.relpath(os.path.join(root, file), logs_folder)
+            available_files.append(rel_path)
+    
+    logs = []
+    selected_file = None
+    
     if request.method == "POST":
-        try:
-            # Ładujemy logi z pliku (zmień ścieżkę na odpowiednią)
-            alerts = load_logs("logs/Linux/Linux_2k.log_structured.csv")
+        selected_file = request.form.get("selected_file")
+        if selected_file:
+            file_path = os.path.join(logs_folder, selected_file)
+            try:
+                # Check if this is a structured CSV file
+                if selected_file.endswith('.csv'):
+                    logs = load_logs(file_path)
+                else:
+                    # For raw text log files
+                    with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
+                        log_lines = f.readlines()
+                        logs = [{"Content": line.strip()} for line in log_lines]
+            except Exception as e:
+                logs = [{"Error": f"Failed to load logs: {str(e)}"}]
+    
+    return render_template("test_AI.html", files=available_files, logs=logs, selected_file=selected_file)
 
-            # Wytwarzamy prompt na podstawie alertów
-            log_text = "\n".join([alert["message"] for alert in alerts])
+@app.route("/analyze_log", methods=["POST"])
+def analyze_log():
+    try:
+        data = request.get_json()
+        log_content = data.get("log_content", "")
+        # print(data)
+        if not log_content:
+            return jsonify({"error": "No log content provided"}), 400
 
-            # Wysyłamy logi do LLM
-            analysis = analyze_log_with_llm(log_text)  # Wykorzystanie funkcji analizy
+        api_key = os.environ.get("GEMINI_API_KEY")
+        if not api_key:
+            return jsonify({"error": "API key not found in environment variables"}), 500
 
-            return render_template("analyze.html", recommendations=analysis)
-        except Exception as e:
-            return render_template("analyze.html", error=f"Error: {str(e)}")
+        # Initialize the AI client
+        client = genai.Client(api_key=api_key)
 
-    # W przypadku GET, po prostu renderujemy pustą stronę
-    return render_template("analyze.html")
+        # Log the received content for debugging
+        print(f"Received log content: {log_content}")
+        prompt = """Analyze log and give answer in pretty output (no latex format, only plain text, dont use stars, it is not markdown output).
+        Give just analysis, dont display introduction sentence. Give some advice. Log: """
+        + log_content
+
+        # Generate AI response
+        response = client.models.generate_content(
+            model="gemini-2.0-flash", contents=prompt
+        )
+
+        # Log the AI response for debugging
+        #print(f"AI response: {response.text}")
+
+        return jsonify({"response": response.text})
+
+    except Exception as e:
+        print(f"Error during analysis: {str(e)}")
+        return jsonify({"error": str(e)}), 500
 
 def run_app():
     app.run(debug=True)
