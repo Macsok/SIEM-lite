@@ -175,9 +175,7 @@ def analyze_log():
 
         # Log the received content for debugging
         print(f"Received log content: {log_content}")
-        prompt = """Analyze log and give answer in pretty output (no latex format, only plain text, dont use stars, it is not markdown output).
-        Give just analysis, dont display introduction sentence. Give some advice. Log: """
-        + log_content
+        prompt = "Analyze log and give answer in pretty output (no latex format, only plain text, dont use stars, it is not markdown output). Give just analysis, dont display introduction sentence. Give some advice. Log: " + log_content
 
         # Generate AI response
         response = client.models.generate_content(
