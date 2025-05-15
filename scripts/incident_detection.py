@@ -3,7 +3,7 @@
 # incident_detection.py
 import pandas as pd
 
-def load_logs(csv_path="logs/Linux/Linux_2k.log_structured.csv"):
+def load_logs(csv_path="../logs/Linux/Linux_2k.log_structured.csv"):
     df = pd.read_csv(csv_path)
     alerts = []
 
@@ -29,3 +29,5 @@ def load_logs(csv_path="logs/Linux/Linux_2k.log_structured.csv"):
             })
 
     return alerts
+
+# print(load_logs())
