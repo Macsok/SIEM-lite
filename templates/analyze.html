@@ -67,7 +67,7 @@
 {% endif %}
 
 <div class="file-selection">
-    <form method="post">
+    <form method="post" action="/analyze">
         <div class="form-group">
             <label for="file_select"><strong>Select a log file:</strong></label>
             <select name="file_select" id="file_select" style="margin: 0 10px; padding: 5px;">
@@ -88,7 +88,7 @@
 {% for log in logs %}
 <div class="log-container">
     <div class="log-message">{{ log.message }}</div>
-    <form method="post">
+    <form method="post" action="/analyze">
         <input type="hidden" name="log_message" value="{{ log.message }}">
         <input type="hidden" name="selected_file" value="{{ selected_file }}">
         <button type="submit" name="analyze_log" class="analyze-btn">Analyze with Gemini</button>

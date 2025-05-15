@@ -3,6 +3,11 @@
 
 # Setting up
 ...
+## Providing API KEY
+Get your API key from `https://aistudio.google.com/app/apikey`. Then use command to set it as local variable (to be used by program):
+```sh
+export GEMINI_API_KEY="your_key"
+```
 
 # Query
 To query the Elasticsearch database, you can use the following methods:
