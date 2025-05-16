@@ -53,7 +53,7 @@
                 <h5>Select a log file</h5>
             </div>
             <div class="card-body">
-                <form method="post">
+                <form method="post" enctype="multipart/form-data">
                     <div class="form-group">
                         <label for="selected_file">Available log files:</label>
                         <select class="form-control" id="selected_file" name="selected_file">
@@ -63,8 +63,16 @@
                             {% endfor %}
                         </select>
                     </div>
+
+                    <div class="form-group mt-3">
+                        <label for="upload_file">Upload a new log file:</label>
+                        <input type="file" class="form-control" name="upload_file" id="upload_file">
+                    </div>
+
                     <button type="submit" class="btn btn-primary mt-2">View Logs</button>
                 </form>
+                <button id="analyze-all" class="btn btn-success mt-3">Analyze All Logs with AI</button>
+                <div id="global-analysis-result" class="response-area mt-2" style="display: none;"></div>
             </div>
         </div>
 
@@ -102,55 +110,86 @@
         </div>
     </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Select all analyze buttons
-            const analyzeButtons = document.querySelectorAll('.analyze-log-btn');
-            
-            analyzeButtons.forEach(button => {
-                button.addEventListener('click', function() {
-                    const logId = this.getAttribute('data-log-id');
-                    const logContentRaw = this.getAttribute('data-log-content');
-                    
-                    // Get the corresponding log content from the pre tag instead of the attribute
-                    const logEntryDiv = this.closest('.log-entry');
-                    const preElement = logEntryDiv.querySelector('pre');
-                    const logContent = preElement.textContent;
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    console.log("DOM fully loaded");
 
-                    const responseArea = document.getElementById(`response-${logId}`);
-                    if (!responseArea) {
-                        console.error(`Response area for log ID ${logId} not found.`);
-                        return;
-                    }
+    // Obsługa pojedynczych przycisków
+    const analyzeButtons = document.querySelectorAll('.analyze-log-btn');
+    console.log(" Found analyze buttons:", analyzeButtons.length);
 
-                    // Show response area
-                    responseArea.style.display = 'block';
-                    responseArea.innerHTML = '<p>Analysis request sent to Google AI. Please wait...</p>';
+    analyzeButtons.forEach(button => {
+        button.addEventListener('click', function () {
+            const logId = this.getAttribute('data-log-id');
+            const logEntryDiv = this.closest('.log-entry');
+            const preElement = logEntryDiv.querySelector('pre');
+            const logContent = preElement.textContent.trim();
 
-                    // Send request to backend
-                    fetch('/analyze_log', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ log_content: logContent })
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.error) {
-                            console.error(`Error from backend: ${data.error}`);
-                            responseArea.innerHTML = `<p style="color: red;">Error: ${data.error}</p>`;
-                        } else {
-                            responseArea.innerHTML = `
-                                <p><strong>AI Response:</strong></p>
-                                <pre>${data.response}</pre>
-                            `;
-                        }
-                    })
-                    .catch(error => {
-                        console.error("Error during fetch:", error);
-                        responseArea.innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
-                    });
-                });
+            const responseArea = document.getElementById(`response-${logId}`);
+            if (!responseArea) {
+                console.error(`Response area for log ID ${logId} not found.`);
+                return;
+            }
+
+            responseArea.style.display = 'block';
+            responseArea.innerHTML = '<p>Analyzing with Google AI...</p>';
+
+            fetch('/analyze_log', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ log_content: logContent })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    responseArea.innerHTML = `<p style="color: red;">Error: ${data.error}</p>`;
+                } else {
+                    responseArea.innerHTML = `<pre>${data.response}</pre>`;
+                }
+            })
+            .catch(error => {
+                console.error("Error during fetch:", error);
+                responseArea.innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
             });
         });
-    </script>
+    });
+
+    // Obsługa globalnego przycisku
+    const analyzeAllBtn = document.getElementById("analyze-all");
+    if (analyzeAllBtn) {
+        analyzeAllBtn.addEventListener("click", function () {
+            const preTags = document.querySelectorAll(".log-entry pre");
+            const allLogs = Array.from(preTags)
+                .map(el => el.textContent.trim())
+                .filter(Boolean)
+                .join("\n");
+
+            const resultBox = document.getElementById("global-analysis-result");
+            resultBox.style.display = 'block';
+            resultBox.innerHTML = "<p>Analyzing all logs...</p>";
+
+            fetch("/analyze_log", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ log_content: allLogs })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.error) {
+                    resultBox.innerHTML = `<p style="color:red;">Error: ${data.error}</p>`;
+                } else {
+                    resultBox.innerHTML = `
+                        <p><strong>AI Response:</strong></p>
+                        <pre>${data.response}</pre>
+                    `;
+                }
+            })
+            .catch(err => {
+                console.error("Global fetch error:", err);
+                resultBox.innerHTML = `<p style="color:red;">Fetch error: ${err.message}</p>`;
+            });
+        });
+    }
+});
+</script>
 {% endblock %}

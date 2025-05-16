@@ -1,8 +1,12 @@
 from flask import Flask, render_template, request, jsonify
 import requests
-
+from scripts.incident_detection import add_alert, generate_alert_from_ai_response
+from werkzeug.utils import secure_filename
 import sys
 import os
+import json
+import csv
+
 
 # Konfiguracja ścieżek
 SCRIPT_DIR = os.path.join(os.path.dirname(__file__), 'scripts')
@@ -10,7 +14,6 @@ TEMPLATE_DIR = os.path.join(os.path.dirname(__file__), 'web', 'templates')
 
 sys.path.append(SCRIPT_DIR)
 
-from scripts.incident_detection import load_logs
 from scripts.llm_utils import analyze_log_with_llm
 from google import genai
 
@@ -49,7 +52,9 @@ def file_selection():
             try:
                 # Check if this is a structured CSV file
                 if selected_file.endswith('.csv'):
-                    logs = load_logs(file_path)
+                    with open(file_path, 'r', encoding='utf-8', errors='ignore') as csvfile:
+                        reader = csv.DictReader(csvfile)
+                        logs = [row for row in reader]
                 else:
                     # For raw text log files
                     with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
@@ -114,9 +119,16 @@ def search():
 
 @app.route("/alerts")
 def alerts():
-    alerts = load_logs("logs/Linux/Linux_2k.log_structured.csv")
-    return render_template("alerts.html", alerts=alerts)
+    alerts = []
 
+    if os.path.exists("alerts.json"):
+        try:
+            with open("alerts.json", "r", encoding="utf-8") as f:
+                alerts = json.load(f)
+        except Exception as e:
+            print("Error loading AI alerts:", e)
+
+    return render_template("alerts.html", alerts=alerts)
 
 @app.route("/analysis", methods=["GET", "POST"])
 def analysis():
@@ -127,7 +139,9 @@ def analysis():
 def test_ai():
     # Path to the folder where your log files are stored
     logs_folder = os.path.join(os.path.dirname(__file__), "logs")
-    
+    uploads_folder = os.path.join(logs_folder, "uploads")
+    os.makedirs(uploads_folder, exist_ok=True)
+
     # Get all log files recursively from the logs directory
     available_files = []
     for root, _, files in os.walk(logs_folder):
@@ -140,13 +154,23 @@ def test_ai():
     selected_file = None
     
     if request.method == "POST":
-        selected_file = request.form.get("selected_file")
+        uploaded_file = request.files.get("upload_file")
+        if uploaded_file and uploaded_file.filename != "":
+            filename = secure_filename(uploaded_file.filename)
+            upload_path = os.path.join(uploads_folder, filename)
+            uploaded_file.save(upload_path)
+            selected_file = os.path.relpath(upload_path, logs_folder)
+        else:
+            selected_file = request.form.get("selected_file")
+
         if selected_file:
             file_path = os.path.join(logs_folder, selected_file)
             try:
                 # Check if this is a structured CSV file
                 if selected_file.endswith('.csv'):
-                    logs = load_logs(file_path)
+                    with open(file_path, 'r', encoding='utf-8', errors='ignore') as csvfile:
+                        reader = csv.DictReader(csvfile)
+                        logs = [row for row in reader]
                 else:
                     # For raw text log files
                     with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
@@ -154,7 +178,35 @@ def test_ai():
                         logs = [{"Content": line.strip()} for line in log_lines]
             except Exception as e:
                 logs = [{"Error": f"Failed to load logs: {str(e)}"}]
-    
+        if logs:
+            all_content = "\n".join(log.get("Content", "") for log in logs if "Content" in log)[:8000]
+
+            try:
+                api_key = os.environ.get("GEMINI_API_KEY")
+                if api_key:
+                    client = genai.Client(api_key=api_key)
+
+                    prompt = (
+                        "Analyze the following logs. "
+                        "If you detect patterns like many authentication failures, logins to unknown users, etc., "
+                        "generate a short alert summary of what threat might be happening, and in what severity "
+                        "(low/medium/high). Return only summary, no introduction. Logs:\n" + all_content
+                    )
+
+                    response = client.models.generate_content(
+                        model="gemini-2.0-flash", contents=prompt
+                    )
+
+                    ai_text = response.text.strip()
+                    if ai_text:
+                        from scripts.incident_detection import generate_alert_from_ai_response, add_alert
+                        alert = generate_alert_from_ai_response(ai_text)
+                        add_alert(alert)
+                        print("AI ALERT GENERATED AND SAVED:", alert)
+
+            except Exception as e:
+                print("AI analysis failed:", e)
+
     return render_template("test_AI.html", files=available_files, logs=logs, selected_file=selected_file)
 
 @app.route("/analyze_log", methods=["POST"])
@@ -181,16 +233,20 @@ def analyze_log():
         response = client.models.generate_content(
             model="gemini-2.0-flash", contents=prompt
         )
+        ai_text = getattr(response, "text", "").strip()
+        if ai_text:
+            from scripts.incident_detection import generate_alert_from_ai_response, add_alert
+            alert = generate_alert_from_ai_response(ai_text)
+            add_alert(alert)
+            print("AI ALERT SAVED:", alert)
 
-        # Log the AI response for debugging
-        #print(f"AI response: {response.text}")
-
-        return jsonify({"response": response.text})
-
+        return jsonify({"response": ai_text})
     except Exception as e:
-        print(f"Error during analysis: {str(e)}")
+        print("Error in analyze_log")
         return jsonify({"error": str(e)}), 500
 
 def run_app():
     app.run(debug=True)
 
+if __name__ == "__main__":
+    run_app()

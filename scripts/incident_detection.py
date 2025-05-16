@@ -1,33 +1,48 @@
-# Tylko dla linuksowych bo tam są jakies symulujace ataki
+import os
+import json
+from datetime import datetime
 
-# incident_detection.py
-import pandas as pd
+ALERTS_FILE = "alerts.json"
 
-def load_logs(csv_path="../logs/Linux/Linux_2k.log_structured.csv"):
-    df = pd.read_csv(csv_path)
+def add_alert(alert):
     alerts = []
+    if os.path.exists(ALERTS_FILE):
+        with open(ALERTS_FILE, "r", encoding="utf-8") as f:
+            alerts = json.load(f)
 
-    for _, row in df.iterrows():
-        content = str(row["Content"]).lower()
+    alerts.append(alert)
 
-        if "authentication failure" in content:
-            alerts.append({
-                "type": "Authentication failure",
-                "severity": "high",
-                "time": f"{row['Month']} {row['Date']} {row['Time']}",
-                "message": row["Content"],
-                "status": "open",
-                "Note": None
-            })
+    with open(ALERTS_FILE, "w", encoding="utf-8") as f:
+        json.dump(alerts, f, indent=2)
 
-        if "user unknown" in content:
-            alerts.append({
-                "type": "Login to Unknown User",
-                "severity": "medium",
-                "time": f"{row['Month']} {row['Date']} {row['Time']}",
-                "message": row["Content"]
-            })
 
-    return alerts
+def generate_alert_from_ai_response(text: str):
+    """
+    Tworzy strukturę alertu na podstawie odpowiedzi od AI.
+    """
+    lowered = text.lower()
+    alert_type = "General AI Alert"
+    severity = "medium"
 
-# print(load_logs())
+    if "brute force" in lowered or "many authentication failure" in lowered:
+        alert_type = "Brute-force Attack Suspected"
+        severity = "high"
+    elif "denial of service" in lowered or "dos" in lowered:
+        alert_type = "Possible DoS Attack"
+        severity = "high"
+    elif "privilege escalation" in lowered:
+        alert_type = "Privilege Escalation"
+        severity = "high"
+    elif "suspicious login" in lowered or "login to unknown user" in lowered:
+        alert_type = "Suspicious Login Detected"
+        severity = "medium"
+    elif "scan" in lowered or "port scan" in lowered:
+        alert_type = "Scanning Activity"
+        severity = "low"
+
+    return {
+        "type": alert_type,
+        "severity": severity,
+        "time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "message": text
+    }
