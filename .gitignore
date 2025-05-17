@@ -3,3 +3,4 @@
 .myenv
 __pycache__
 .vscode
+logs/uploads/*

@@ -31,7 +31,7 @@ def home():
 @app.route("/file", methods=["GET", "POST"])
 def file_selection():
     # Path to the folder where your log files are stored
-    logs_folder = os.path.join(os.path.dirname(__file__), "logs")
+    logs_folder = os.path.join(os.path.dirname(__file__), "../logs")
     
     # Get all log files recursively from the logs directory
     available_files = []
@@ -137,7 +137,7 @@ def analysis():
 @app.route("/test_AI", methods=["GET", "POST"])
 def test_ai():
     # Path to the folder where your log files are stored
-    logs_folder = os.path.join(os.path.dirname(__file__), "logs")
+    logs_folder = os.path.join(os.path.dirname(__file__), "../logs")
     uploads_folder = os.path.join(logs_folder, "uploads")
     os.makedirs(uploads_folder, exist_ok=True)
 
