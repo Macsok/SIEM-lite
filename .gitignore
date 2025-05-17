@@ -4,3 +4,6 @@
 __pycache__
 .vscode
 logs/uploads/*
+
+#Exceptions
+!logs/uploads/.gitkeep
