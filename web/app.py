@@ -120,9 +120,9 @@ def search():
 def alerts():
     alerts = []
 
-    if os.path.exists("alerts.json"):
+    if os.path.exists("scripts/alerts.json"):
         try:
-            with open("alerts.json", "r", encoding="utf-8") as f:
+            with open("scripts/alerts.json", "r", encoding="utf-8") as f:
                 alerts = json.load(f)
         except Exception as e:
             print("Error loading AI alerts:", e)
