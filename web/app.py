@@ -9,12 +9,11 @@ import csv
 
 
 # Konfiguracja ścieżek
-SCRIPT_DIR = os.path.join(os.path.dirname(__file__), 'scripts')
-TEMPLATE_DIR = os.path.join(os.path.dirname(__file__), 'web', 'templates')
+SCRIPT_DIR = os.path.join(os.path.dirname(__file__), '../scripts')
+TEMPLATE_DIR = os.path.join(os.path.dirname(__file__), 'templates')
 
 sys.path.append(SCRIPT_DIR)
 
-from scripts.llm_utils import analyze_log_with_llm
 from google import genai
 
 app = Flask(__name__, template_folder=TEMPLATE_DIR)
@@ -247,6 +246,3 @@ def analyze_log():
 
 def run_app():
     app.run(debug=True)
-
-if __name__ == "__main__":
-    run_app()
