@@ -8,47 +8,45 @@
     
     <div class="card mb-4">
         <div class="card-header">
-            <h5 class="mb-0">Select a log file</h5>
+            <h5>Select a log file</h5>
         </div>
         <div class="card-body">
             <form method="post">
                 <div class="form-group">
-                    <label for="selected_file" class="form-label">Available log files:</label>
-                    <select class="form-select" id="selected_file" name="selected_file">
+                    <label for="selected_file">Available log files:</label>
+                    <select class="form-control" id="selected_file" name="selected_file">
                         <option value="">-- Select a file --</option>
                         {% for file in files %}
                         <option value="{{ file }}" {% if selected_file == file %}selected{% endif %}>{{ file }}</option>
                         {% endfor %}
                     </select>
                 </div>
-                <button type="submit" class="btn btn-primary mt-3">View Logs</button>
+                <button type="submit" class="btn btn-primary mt-2">View Logs</button>
             </form>
         </div>
     </div>
     
     {% if logs %}
     <div class="card">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <h5 class="mb-0">Logs from: {{ selected_file }}</h5>
-            <span class="badge bg-info">{{ logs|length }} entries found</span>
+        <div class="card-header">
+            <h5>Logs from: {{ selected_file }}</h5>
+            <span class="badge badge-info">{{ logs|length }} entries found</span>
         </div>
         <div class="card-body log-container">
             <div class="list-group">
                 {% for log in logs %}
                 <div class="card mb-2 log-entry">
-                    <div class="card-header bg-dark py-1 px-2 d-flex justify-content-between align-items-center">
-                        <div>
-                            {% if log.Timestamp %}
-                                <span class="fw-bold">{{ log.Timestamp }}</span>
-                            {% elif log.DateTime %}
-                                <span class="fw-bold">{{ log.DateTime }}</span>
-                            {% else %}
-                                <span class="text-muted">Log Entry #{{ loop.index }}</span>
-                            {% endif %}
-                        </div>
-                        
+                    <div class="card-header bg-light py-1 px-2">
+                        {% if log.Timestamp %}
+                            <span class="font-weight-bold">{{ log.Timestamp }}</span>
+                        {% elif log.DateTime %}
+                            <span class="font-weight-bold">{{ log.DateTime }}</span>
+                        {% else %}
+                            <span class="text-muted">Log Entry #{{ loop.index }}</span>
+                        {% endif %}
+
                         {% if log.Level %}
-                            <span class="badge {% if log.Level == 'ERROR' %}bg-danger{% elif log.Level == 'WARNING' %}bg-warning{% elif log.Level == 'INFO' %}bg-info{% else %}bg-secondary{% endif %}">
+                            <span class="badge {% if log.Level == 'ERROR' %}badge-danger{% elif log.Level == 'WARNING' %}badge-warning{% elif log.Level == 'INFO' %}badge-info{% else %}badge-secondary{% endif %} ml-2">
                                 {{ log.Level }}
                             </span>
                         {% endif %}
@@ -73,7 +71,7 @@
                                 {% if key not in ['Timestamp', 'DateTime', 'Level', 'EventId', 'EventTemplate'] %}
                                 <div class="col-md-6">
                                     <p class="mb-1">
-                                        <strong class="text-info">{{ key }}:</strong> 
+                                        <strong>{{ key }}:</strong> 
                                         <span class="text-break">{{ value }}</span>
                                     </p>
                                 </div>
@@ -103,12 +101,11 @@
         overflow-y: auto;
     }
     .log-entry {
-        border-left: 3px solid var(--border-color);
-        transition: all 0.2s ease;
+        border-left: 3px solid #dee2e6;
     }
     .log-entry:hover {
-        border-left: 3px solid var(--secondary-accent);
-        box-shadow: 0 0.125rem 0.25rem rgba(106, 90, 205, 0.3);
+        border-left: 3px solid #007bff;
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
     }
     pre {
         white-space: pre-wrap;
@@ -119,15 +116,15 @@
         word-break: break-word;
     }
     
+    /* Additional styles from test_AI.html */
     .response-area {
         margin-top: 10px;
         padding: 10px;
-        border: 1px solid var(--border-color);
-        background-color: rgba(0, 0, 0, 0.2);
-        border-radius: 5px;
+        border: 1px solid #ddd;
+        background-color: #f8f9fa;
     }
     .markdown-content {
-        background-color: rgba(0, 0, 0, 0.2);
+        background-color: #f8f9fa;
         padding: 10px;
         border-radius: 4px;
     }

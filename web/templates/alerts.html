@@ -1,22 +1,117 @@
-
 {% extends "base.html" %}
 
 {% block head %}
     <title>Security Alerts</title>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <style>
+        .custom-alert {
+            background-color: var(--card-bg);
+            border-left: 4px solid var(--secondary-accent);
+            margin-bottom: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .custom-alert:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(106, 90, 205, 0.4);
+        }
+        
+        .alert-title {
+            color: var(--secondary-accent);
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        
+        .alert-time {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+        
+        .alert-message {
+            background-color: rgba(0, 0, 0, 0.2);
+            padding: 1rem;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 0.9rem;
+            color: var(--text-primary);
+            white-space: pre-wrap;
+            word-break: break-word;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .severity-high {
+            background-color: var(--danger-color);
+            color: white;
+            padding: 0.35em 0.65em;
+            font-size: 0.85em;
+            border-radius: 4px;
+        }
+        
+        .severity-medium {
+            background-color: var(--warning-color);
+            color: #212529;
+            padding: 0.35em 0.65em;
+            font-size: 0.85em;
+            border-radius: 4px;
+        }
+        
+        .severity-low {
+            background-color: var(--success-color);
+            color: white;
+            padding: 0.35em 0.65em;
+            font-size: 0.85em;
+            border-radius: 4px;
+        }
+        
+        .modal-content {
+            background-color: var(--secondary-bg);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+        
+        .modal-header {
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .modal-footer {
+            border-top: 1px solid var(--border-color);
+        }
+        
+        .btn-outline-light {
+            border-color: var(--secondary-accent);
+            color: var(--secondary-accent);
+        }
+        
+        .btn-outline-light:hover {
+            background-color: var(--secondary-accent);
+            color: white;
+        }
+    </style>
 {% endblock %}
 
 {% block content %}
-    <h1>ALERTS</h1>
+    <h1>Security Alerts</h1>
 
     {% if alerts %}
+        <div class="row">
+            <div class="col-12">
+                <div class="alert alert-info mb-4">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <span>{{ alerts|length }} alert(s) detected in your environment</span>
+                </div>
+            </div>
+        </div>
+        
         {% for alert in alerts %}
             <div class="card custom-alert">
                 <div class="card-body">
                     <h5 class="alert-title">{{ alert.type }}</h5>
 
                     <div class="d-flex align-items-center gap-2 mt-2">
-                        <span class="badge severity-{{ alert.severity|lower }}">{{ alert.severity }}</span>
+                        <span class="severity-{{ alert.severity|lower }}">{{ alert.severity }}</span>
                         <small class="alert-time">{{ alert.time }}</small>
                     </div>
 
@@ -24,7 +119,7 @@
 
                     <button class="btn btn-outline-light btn-sm mt-3"
                             onclick="showAlertDetails({{ alert | tojson }}, {{ loop.index0 }})">
-                        Details
+                        <i class="fas fa-search me-1"></i> View Details
                     </button>
                 </div>
             </div>
@@ -33,31 +128,55 @@
         <!-- Modal for alert details -->
         <div class="modal fade" id="alertModal" tabindex="-1" aria-labelledby="alertModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-lg modal-dialog-scrollable">
-                <div class="modal-content bg-dark text-light">
-                    <div class="modal-header border-secondary">
-                        <h5 class="modal-title">Alert Details</h5>
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="alertModalTitle">Alert Details</h5>
                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body" id="modalBody">
                         <!-- Filled dynamically -->
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
                     </div>
                 </div>
             </div>
         </div>
 
     {% else %}
-        <p>No alerts detected.</p>
+        <div class="card">
+            <div class="card-body text-center py-5">
+                <i class="fas fa-shield-alt fa-4x mb-3 text-secondary"></i>
+                <h4>No Alerts Detected</h4>
+                <p class="text-secondary">Your environment appears to be secure at the moment.</p>
+            </div>
+        </div>
     {% endif %}
 
     <script>
         function showAlertDetails(alert, index) {
+            const modalTitle = document.getElementById("alertModalTitle");
             const modalBody = document.getElementById("modalBody");
+            
+            modalTitle.textContent = `Alert: ${alert.type}`;
+            
             modalBody.innerHTML = `
-                <p><strong>Type:</strong> ${alert.type}</p>
-                <p><strong>Severity:</strong> ${alert.severity}</p>
-                <p><strong>Time:</strong> ${alert.time}</p>
-                <pre><code>${alert.message}</code></pre>
+                <div class="mb-3">
+                    <h6 class="text-secondary mb-2">Alert Severity</h6>
+                    <span class="severity-${alert.severity.toLowerCase()}">${alert.severity}</span>
+                </div>
+                
+                <div class="mb-3">
+                    <h6 class="text-secondary mb-2">Time Detected</h6>
+                    <p>${alert.time}</p>
+                </div>
+                
+                <div>
+                    <h6 class="text-secondary mb-2">Alert Message</h6>
+                    <div class="alert-message">${alert.message}</div>
+                </div>
             `;
+            
             const modal = new bootstrap.Modal(document.getElementById("alertModal"));
             modal.show();
         }

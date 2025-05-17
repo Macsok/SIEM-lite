@@ -2,7 +2,124 @@
 
 {% block title %}Home - SIEM-lite{% endblock %}
 
+{% block head %}
+<style>
+    .feature-card {
+        background: linear-gradient(145deg, #1e2340, #1a1e38);
+        border-radius: 16px;
+        padding: 1.75rem;
+        transition: all 0.3s ease;
+        height: 100%;
+        border: 1px solid var(--border-color);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+    
+    .feature-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 12px 25px rgba(123, 104, 238, 0.25);
+        border-color: var(--primary-accent);
+    }
+    
+    .feature-icon {
+        font-size: 2.5rem;
+        margin-bottom: 1.5rem;
+        background: linear-gradient(135deg, var(--primary-accent), var(--tertiary-accent));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    
+    .welcome-text {
+        background: linear-gradient(90deg, var(--tertiary-accent), var(--primary-accent));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-weight: bold;
+        text-shadow: 0 0 20px rgba(123, 104, 238, 0.5);
+        letter-spacing: 1px;
+    }
+    
+    .intro-card {
+        background: linear-gradient(145deg, rgba(30, 35, 64, 0.7), rgba(26, 30, 56, 0.7));
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(123, 104, 238, 0.2);
+        border-radius: 20px;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+    }
+    
+    .btn-feature {
+        padding: 0.75rem 1.5rem;
+        font-weight: 500;
+        letter-spacing: 0.5px;
+        margin-top: auto;
+        width: 100%;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<h1>Welcome to SIEM-lite</h1>
-<p>Select an option from the sidebar to get started.</p>
+<div class="container py-5">
+    <div class="text-center mb-5">
+        <h1 class="display-4 mb-3 welcome-text">Welcome to SIEM-lite</h1>
+        <p class="lead text-secondary mb-4">A lightweight Security Information and Event Management solution</p>
+    </div>
+    
+    <div class="row justify-content-center mb-5">
+        <div class="col-md-10">
+            <div class="card intro-card">
+                <div class="card-body text-center p-5">
+                    <h3 class="mb-4">Security at a Glance</h3>
+                    <p class="mb-4">SIEM-lite provides powerful tools for monitoring, analyzing, and securing your environment. Use the features below to get started.</p>
+                    <div class="d-flex flex-wrap justify-content-center gap-3 mt-4">
+                        <a href="/file" class="btn btn-primary btn-lg">
+                            <i class="fas fa-file-alt me-2"></i>View Logs
+                        </a>
+                        <a href="/search" class="btn btn-primary btn-lg">
+                            <i class="fas fa-search me-2"></i>Search
+                        </a>
+                        <a href="/test_AI" class="btn btn-primary btn-lg">
+                            <i class="fas fa-robot me-2"></i>AI Analysis
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-5 g-4">
+        <div class="col-md-4">
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-file-alt"></i>
+                </div>
+                <h4>Log Viewing</h4>
+                <p class="text-secondary mb-4">Browse and inspect log files from your system for detailed analysis.</p>
+                <a href="/file" class="btn btn-primary btn-feature">View Logs</a>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-search"></i>
+                </div>
+                <h4>Advanced Search</h4>
+                <p class="text-secondary mb-4">Search through your logs with powerful filters and regular expressions.</p>
+                <a href="/search" class="btn btn-primary btn-feature">Search Now</a>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <h4>AI Analysis</h4>
+                <p class="text-secondary mb-4">Leverage AI to analyze and interpret complex log patterns and anomalies.</p>
+                <a href="/test_AI" class="btn btn-primary btn-feature">Try AI Analysis</a>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}

@@ -6,109 +6,166 @@
 <style>
     .log-container {
         margin-bottom: 20px;
-        padding: 10px;
-        border: 1px solid #ddd;
-        border-radius: 5px;
-        background-color: #f8f9fa;
+        padding: 15px;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        background-color: var(--card-bg);
+        transition: all 0.3s ease;
     }
+    
+    .log-container:hover {
+        box-shadow: 0 4px 12px rgba(106, 90, 205, 0.3);
+        border-left: 4px solid var(--secondary-accent);
+    }
+    
     .log-message {
-        margin-bottom: 10px;
+        margin-bottom: 15px;
         font-family: monospace;
         white-space: pre-wrap;
         overflow-wrap: break-word;
+        background-color: #2d2d2d;
+        padding: 12px;
+        border-radius: 6px;
+        border: 1px solid var(--border-color);
+        color: var(--text-primary);
     }
+    
     .analysis-result {
-        margin-top: 20px;
-        padding: 15px;
-        border-left: 4px solid #1056b3;
-        background-color: #e9f0f8;
+        margin-top: 25px;
+        padding: 20px;
+        border-left: 4px solid var(--secondary-accent);
+        background-color: rgba(106, 90, 205, 0.1);
         white-space: pre-line;
+        border-radius: 8px;
     }
+    
     .analyzed-log {
-        margin-top: 10px;
-        padding: 10px;
-        background-color: #f0f0f0;
+        margin-top: 15px;
+        padding: 15px;
+        background-color: rgba(0, 0, 0, 0.2);
         border-left: 4px solid #ff6b6b;
         font-family: monospace;
         white-space: pre-wrap;
         overflow-wrap: break-word;
+        border-radius: 6px;
     }
+    
     .file-selection {
         margin-bottom: 30px;
+        background-color: var(--card-bg);
+        padding: 20px;
+        border-radius: 8px;
+        border: 1px solid var(--border-color);
     }
+    
     .error-message {
-        color: #721c24;
-        background-color: #f8d7da;
-        padding: 10px;
-        border-radius: 5px;
-        margin-bottom: 20px;
+        color: #f8d7da;
+        background-color: rgba(220, 53, 69, 0.2);
+        padding: 15px;
+        border-radius: 6px;
+        margin-bottom: 25px;
+        border-left: 4px solid var(--danger-color);
     }
+    
     button.analyze-btn {
-        background-color: #1056b3;
+        background-color: var(--secondary-accent);
         color: white;
         border: none;
-        padding: 5px 10px;
-        border-radius: 3px;
+        padding: 8px 15px;
+        border-radius: 4px;
         cursor: pointer;
+        transition: all 0.3s ease;
     }
+    
     button.analyze-btn:hover {
-        background-color: #0a3d8f;
+        background-color: var(--primary-accent);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+    
+    select {
+        background-color: #333;
+        color: var(--text-primary);
+        border: 1px solid var(--border-color);
+        padding: 8px;
+        border-radius: 4px;
+    }
+    
+    select:focus {
+        outline: none;
+        border-color: var(--secondary-accent);
     }
 </style>
 {% endblock %}
 
-{% block body %}
-<h1>Analyze Logs</h1>
+{% block content %}
+<h1>Analyze Logs with AI</h1>
 
 {% if error %}
 <div class="error-message">
-    {{ error }}
+    <i class="fas fa-exclamation-circle me-2"></i>{{ error }}
 </div>
 {% endif %}
 
 <div class="file-selection">
     <form method="post">
-        <div class="form-group">
-            <label for="file_select"><strong>Select a log file:</strong></label>
-            <select name="file_select" id="file_select" style="margin: 0 10px; padding: 5px;">
-                <option value="">Choose file</option>
-                {% for file in available_files %}
-                <option value="{{ file }}" {% if file == selected_file %}selected{% endif %}>{{ file }}</option>
-                {% endfor %}
-            </select>
+        <div class="form-group mb-3">
+            <label for="file_select"><strong>Select a log file for analysis:</strong></label>
+            <div class="d-flex mt-2">
+                <select name="file_select" id="file_select" class="form-select me-3">
+                    <option value="">Choose file</option>
+                    {% for file in available_files %}
+                    <option value="{{ file }}" {% if file == selected_file %}selected{% endif %}>{{ file }}</option>
+                    {% endfor %}
+                </select>
+                <button type="submit" name="file_select" class="btn btn-primary">
+                    <i class="fas fa-file-alt me-2"></i>Load Logs
+                </button>
+            </div>
         </div>
-        <button type="submit" name="file_select" class="analyze-btn" style="margin-top: 10px;">Load Logs</button>
     </form>
 </div>
 
 {% if logs %}
-<h2>Logs from {{ selected_file }}</h2>
-<p><em>Total: {{ logs|length }} log entries</em></p>
-
-{% for log in logs %}
-<div class="log-container">
-    <div class="log-message">{{ log.message }}</div>
-    <form method="post">
-        <input type="hidden" name="log_message" value="{{ log.message }}">
-        <input type="hidden" name="selected_file" value="{{ selected_file }}">
-        <button type="submit" name="analyze_log" class="analyze-btn">Analyze with Gemini</button>
-    </form>
+<div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Logs from {{ selected_file }}</h5>
+        <span class="badge bg-primary">{{ logs|length }} entries</span>
+    </div>
+    <div class="card-body">
+        {% for log in logs %}
+        <div class="log-container">
+            <div class="log-message">{{ log.message }}</div>
+            <form method="post">
+                <input type="hidden" name="log_message" value="{{ log.message }}">
+                <input type="hidden" name="selected_file" value="{{ selected_file }}">
+                <button type="submit" name="analyze_log" class="analyze-btn">
+                    <i class="fas fa-brain me-2"></i>Analyze with Gemini
+                </button>
+            </form>
+        </div>
+        {% endfor %}
+    </div>
 </div>
-{% endfor %}
 {% endif %}
 
 {% if analysis_result %}
 <div class="analysis-result">
-    <h3>Gemini AI Analysis</h3>
+    <div class="d-flex align-items-center mb-3">
+        <i class="fas fa-robot me-2 text-primary"></i>
+        <h3 class="mb-0">Gemini AI Analysis</h3>
+    </div>
+    
     {% if log_analyzed %}
     <div class="analyzed-log">
         <strong>Log analyzed:</strong>
         {{ log_analyzed }}
     </div>
     {% endif %}
-    <div style="margin-top: 15px;">
-        <strong>Analysis:</strong>
-        {{ analysis_result }}
+    
+    <div class="mt-4 p-3 rounded" style="background-color: rgba(0, 0, 0, 0.2);">
+        <h5 class="mb-3 text-info">Analysis Results:</h5>
+        <div class="analysis-content">{{ analysis_result }}</div>
     </div>
 </div>
 {% endif %}

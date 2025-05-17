@@ -3,62 +3,230 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Test AI</title>
-    <!-- <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"> -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <!-- <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"> -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://kit.fontawesome.com/4c02e9d8d7.js" crossorigin="anonymous"></script>
     <style>
-        .log-container {
-            /* max-height: 70vh; */
-            overflow-y: auto;
+        :root {
+            --purple-primary: #9370DB;    /* Medium Purple */
+            --purple-secondary: #B19CD9;  /* Light Purple */
+            --purple-accent: #8A2BE2;     /* BlueViolet - for stronger accents */
+            --purple-light: #D8BFD8;      /* Thistle - for lightest accents */
+            --text-bright: #ffffff;       /* Bright white for main text */
+            --text-light: #f0f0f0;        /* Light white for general text */
         }
-        .log-entry {
-            border-left: 3px solid #dee2e6;
-            margin-bottom: 10px;
-            padding: 10px;
+        
+        /* Sidebar consistency fixes */
+        .sidebar {
+            visibility: visible !important;
+            display: block !important;
         }
-        .log-entry:hover {
-            border-left: 3px solid #007bff;
-            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        
+        /* Remove underlines from sidebar links */
+        .sidebar a:hover, .sidebar a.active, .sidebar a:focus {
+            text-decoration: none !important;
+            background-color: var(--purple-accent) !important;
         }
+        
+        /* Improve text readability on dark backgrounds */
+        pre, .markdown-content, .response-area, .card-body, .card-header {
+            color: var(--text-bright) !important;
+        }
+        
+        /* Improve form element readability */
+        .form-select, .form-control {
+            color: var(--text-bright) !important;
+        }
+        
+        /* Improve badge text contrast */
+        .badge {
+            color: var(--text-bright) !important;
+        }
+        
+        /* Add purple accents to headings */
+        h1, h2, h3, h4, h5, h6 {
+            color: var(--purple-secondary) !important;
+            text-shadow: 0 0 10px rgba(147, 112, 219, 0.3);
+        }
+        
+        /* Make card headers more visible with purple accent */
+        .card-header {
+            background-color: rgba(147, 112, 219, 0.15) !important;
+            border-bottom: 1px solid var(--purple-secondary) !important;
+        }
+        
+        /* Brighter text for log entries */
+        .log-entry .card-body {
+            color: var(--text-bright) !important;
+        }
+        
+        /* Add subtle purple glow to cards */
+        .card {
+            box-shadow: 0 4px 12px rgba(147, 112, 219, 0.1) !important;
+        }
+        
+        /* Make buttons more purple-themed */
+        .btn-primary {
+            background-color: var(--purple-primary) !important;
+            border-color: var(--purple-primary) !important;
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--purple-accent) !important;
+            border-color: var(--purple-accent) !important;
+        }
+        
+        .btn-outline-primary {
+            color: var(--purple-primary) !important;
+            border-color: var(--purple-primary) !important;
+        }
+        
+        .btn-outline-primary:hover {
+            background-color: var(--purple-primary) !important;
+            color: white !important;
+        }
+        
+        /* Style response areas with purple accents */
         .response-area {
-            margin-top: 10px;
-            padding: 10px;
-            border: 1px solid #ddd;
-            background-color: #f8f9fa;
+            border-left: 3px solid var(--purple-primary) !important;
         }
+        
+        .log-container {
+            max-height: 70vh;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: var(--purple-primary) var(--card-bg);
+        }
+        
+        .log-container::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .log-container::-webkit-scrollbar-track {
+            background: var(--card-bg);
+        }
+        
+        .log-container::-webkit-scrollbar-thumb {
+            background-color: var(--purple-primary);
+            border-radius: 4px;
+        }
+        
+        .log-entry {
+            border-left: 3px solid var(--border-color);
+            margin-bottom: 15px;
+            padding: 10px;
+            transition: all 0.3s ease;
+        }
+        
+        .log-entry:hover {
+            border-left: 3px solid var(--purple-accent);
+            box-shadow: 0 0.125rem 0.5rem rgba(147, 112, 219, 0.4);
+            transform: translateX(3px);
+        }
+        
+        .response-area {
+            margin-top: 15px;
+            padding: 15px;
+            border: 1px solid var(--border-color);
+            background-color: rgba(0, 0, 0, 0.2);
+            border-radius: 6px;
+            text-align: left;
+        }
+        
         pre {
             white-space: pre-wrap;
             word-break: break-word;
-            font-size: 0.85rem;
+            font-size: 0.9rem;
+            background-color: #2a2a2a;
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px solid var(--border-color);
+            color: var(--text-bright);
         }
+        
         .text-break {
             word-break: break-word;
         }
+        
         .markdown-content {
-            background-color: #f8f9fa;
-            padding: 10px;
-            border-radius: 4px;
+            background-color: rgba(147, 112, 219, 0.1);
+            padding: 15px;
+            border-radius: 6px;
+            border: 1px solid rgba(147, 112, 219, 0.3);
+            white-space: pre-wrap;
+            text-align: left;
+            font-family: 'Consolas', monospace;
+            line-height: 1.6;
+            overflow-x: auto;
+            color: var(--text-bright);
+        }
+        
+        .markdown-content p {
+            text-align: left;
+            margin-bottom: 1em;
+            color: var(--text-bright);
+        }
+        
+        .badge {
+            font-weight: normal;
+            padding: 0.5em 0.8em;
+            background-color: var(--purple-primary) !important;
+        }
+        
+        .analyze-log-btn {
+            transition: all 0.3s ease;
+        }
+        
+        .analyze-log-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(147, 112, 219, 0.3);
+        }
+        
+        .form-select {
+            background-color: #333;
+            color: var(--text-bright);
+            border-color: var(--border-color);
+        }
+        
+        .form-select:focus {
+            background-color: #3a3a3a;
+            color: var(--text-bright);
+            border-color: var(--purple-primary);
+            box-shadow: 0 0 0 0.25rem rgba(147, 112, 219, 0.25);
+        }
+        
+        /* Brighten text in dark areas */
+        .bg-dark {
+            color: var(--text-bright) !important;
+        }
+        
+        .text-secondary {
+            color: var(--purple-light) !important;
+        }
+        
+        /* Make icons more visible with purple tint */
+        .fa-brain, .fa-robot, .fa-spinner {
+            color: var(--purple-light);
         }
     </style>
 {% endblock %}
 
 {% block content %}
     <div class="container mt-4">
-        <h1>Test AI</h1>
+        <h1>AI Log Analysis</h1>
         
         <div class="card mb-4">
             <div class="card-header">
-                <h5>Select a log file</h5>
+                <h5 class="mb-0">Select or Upload a Log File</h5>
             </div>
             <div class="card-body">
                 <form method="post" enctype="multipart/form-data">
-                    <div class="form-group">
-                        <label for="selected_file">Available log files:</label>
-                        <select class="form-control" id="selected_file" name="selected_file">
+                    <div class="form-group mb-3">
+                        <label for="selected_file" class="form-label">Available log files:</label>
+                        <select class="form-select" id="selected_file" name="selected_file">
                             <option value="">-- Select a file --</option>
                             {% for file in files %}
                             <option value="{{ file }}" {% if selected_file == file %}selected{% endif %}>{{ file }}</option>
@@ -66,36 +234,38 @@
                         </select>
                     </div>
 
-                    <div class="form-group mt-3">
-                        <label for="upload_file">Upload a new log file:</label>
+                    <div class="form-group mb-3">
+                        <label for="upload_file" class="form-label">Upload a new log file:</label>
                         <input type="file" class="form-control" name="upload_file" id="upload_file">
                     </div>
 
                     <button type="submit" class="btn btn-primary mt-2">View Logs</button>
                 </form>
-                <button id="analyze-all" class="btn btn-success mt-3">Analyze All Logs with AI</button>
-                <div id="global-analysis-result" class="response-area mt-2" style="display: none;"></div>
+                <button id="analyze-all" class="btn btn-success mt-4">
+                    <i class="fas fa-brain me-2"></i>Analyze All Logs with AI
+                </button>
+                <div id="global-analysis-result" class="response-area mt-3" style="display: none;"></div>
             </div>
         </div>
 
         {% if logs %}
         <div class="card">
-            <div class="card-header">
-                <h5>Logs from: {{ selected_file }}</h5>
-                <span class="badge badge-info">{{ logs|length }} entries found</span>
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Logs from: {{ selected_file }}</h5>
+                <span class="badge">{{ logs|length }} entries found</span>
             </div>
-            <div class="card-body log-container">
+            <!-- <div class="card-body log-container"> -->
                 {% for log in logs %}
-                <div class="card mb-2 log-entry">
-                    <div class="card-header bg-light py-1 px-2">
-                        <span class="text-muted">Log Entry #{{ loop.index }}</span>
+                <div class="card mb-3 log-entry">
+                    <div class="card-header bg-dark py-2 px-3">
+                        <span class="text-secondary">Log Entry #{{ loop.index }}</span>
                     </div>
                     <div class="card-body py-2 px-3">
                         <pre>{{ log.Content or log | tojson }}</pre>
                     </div>
                     <div class="card-footer py-2 px-3">
-                        <button class="btn btn-sm btn-outline-primary analyze-log-btn" data-log-id="{{ loop.index }}">
-                            <i class="fas fa-brain mr-1"></i> Analyze with Google AI
+                        <button class="btn btn-outline-primary analyze-log-btn" data-log-id="{{ loop.index }}">
+                            <i class="fas fa-brain me-2"></i> Analyze with Google AI
                         </button>
                     </div>
                     <div class="response-area" id="response-{{ loop.index }}" style="display: none;">
@@ -103,12 +273,14 @@
                     </div>
                 </div>
                 {% endfor %}
-            </div>
+            <!-- </div> -->
         </div>
         {% endif %}
 
-        <div class="mt-3">
-            <a href="/home" class="btn btn-secondary">Back to Home</a>
+        <div class="mt-4">
+            <a href="/home" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Back to Home
+            </a>
         </div>
     </div>
 
@@ -116,7 +288,7 @@
 document.addEventListener('DOMContentLoaded', function () {
     console.log("DOM fully loaded");
 
-    // Obsługa pojedynczych przycisków
+    // Handle individual analyze buttons
     const analyzeButtons = document.querySelectorAll('.analyze-log-btn');
     console.log(" Found analyze buttons:", analyzeButtons.length);
 
@@ -134,7 +306,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
             responseArea.style.display = 'block';
-            responseArea.innerHTML = '<p>Analyzing with Google AI...</p>';
+            responseArea.innerHTML = '<p><i class="fas fa-spinner fa-spin me-2"></i>Analyzing with Google AI...</p>';
 
             fetch('/analyze_log', {
                 method: 'POST',
@@ -144,19 +316,19 @@ document.addEventListener('DOMContentLoaded', function () {
             .then(response => response.json())
             .then(data => {
                 if (data.error) {
-                    responseArea.innerHTML = `<p style="color: red;">Error: ${data.error}</p>`;
+                    responseArea.innerHTML = `<p class="text-danger"><i class="fas fa-exclamation-circle me-2"></i>Error: ${data.error}</p>`;
                 } else {
-                    responseArea.innerHTML = `<pre>${data.response}</pre>`;
+                    responseArea.innerHTML = `<pre class="markdown-content">${data.response}</pre>`;
                 }
             })
             .catch(error => {
                 console.error("Error during fetch:", error);
-                responseArea.innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
+                responseArea.innerHTML = `<p class="text-danger"><i class="fas fa-exclamation-circle me-2"></i>Error: ${error.message}</p>`;
             });
         });
     });
 
-    // Obsługa globalnego przycisku
+    // Handle global analyze button
     const analyzeAllBtn = document.getElementById("analyze-all");
     if (analyzeAllBtn) {
         analyzeAllBtn.addEventListener("click", function () {
@@ -168,7 +340,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             const resultBox = document.getElementById("global-analysis-result");
             resultBox.style.display = 'block';
-            resultBox.innerHTML = "<p>Analyzing all logs...</p>";
+            resultBox.innerHTML = "<p><i class='fas fa-spinner fa-spin me-2'></i>Analyzing all logs...</p>";
 
             fetch("/analyze_log", {
                 method: "POST",
@@ -178,17 +350,20 @@ document.addEventListener('DOMContentLoaded', function () {
             .then(res => res.json())
             .then(data => {
                 if (data.error) {
-                    resultBox.innerHTML = `<p style="color:red;">Error: ${data.error}</p>`;
+                    resultBox.innerHTML = `<p class="text-danger"><i class="fas fa-exclamation-circle me-2"></i>Error: ${data.error}</p>`;
                 } else {
                     resultBox.innerHTML = `
-                        <p><strong>AI Response:</strong></p>
-                        <pre>${data.response}</pre>
+                        <div class="d-flex align-items-center mb-3">
+                            <i class="fas fa-robot me-2 text-primary"></i>
+                            <h5 class="mb-0">AI Analysis Results</h5>
+                        </div>
+                        <pre class="markdown-content">${data.response}</pre>
                     `;
                 }
             })
             .catch(err => {
                 console.error("Global fetch error:", err);
-                resultBox.innerHTML = `<p style="color:red;">Fetch error: ${err.message}</p>`;
+                resultBox.innerHTML = `<p class="text-danger"><i class="fas fa-exclamation-circle me-2"></i>Fetch error: ${err.message}</p>`;
             });
         });
     }

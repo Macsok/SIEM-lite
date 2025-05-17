@@ -5,54 +5,231 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}SIEM-lite{% endblock %}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-
-<!--    <style>-->
-<!--        body {-->
-<!--            font-family: Arial, sans-serif;-->
-<!--            font-size: 16px;-->
-<!--            line-height: 1.5;-->
-<!--            margin: 0;-->
-<!--            padding: 0;-->
-<!--            display: flex;-->
-<!--        }-->
-<!--        .sidebar {-->
-<!--            font-size: 16px;-->
-<!--            width: 250px;-->
-<!--            background-color: #1056b3;-->
-<!--            color: white;-->
-<!--            height: 100vh;-->
-<!--            padding: 1rem;-->
-<!--            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);-->
-<!--            position: fixed;-->
-<!--            top: 0;-->
-<!--            left: 0;-->
-<!--        }-->
-<!--        .sidebar a {-->
-<!--            color: white;-->
-<!--            text-decoration: none;-->
-<!--            display: block;-->
-<!--            margin: 1rem 0;-->
-<!--            font-weight: bold;-->
-<!--        }-->
-<!--        .sidebar a:hover {-->
-<!--            text-decoration: underline;-->
-<!--        }-->
-<!--        .content {-->
-<!--            flex: 1;-->
-<!--            padding: 2rem;-->
-<!--            background-color: #f9f9f9;-->
-<!--            margin-left: 250px;-->
-<!--        }-->
-<!--        h1 {-->
-<!--            color: #333;-->
-<!--            font-size: 1.8rem;-->
-<!--            text-align: center; -->
-<!--            color: #0056b3;-->
-<!--            font-weight: bold;-->
-<!--        }-->
-<!--    </style>-->
+    <style>
+        :root {
+            --primary-bg: #0d0f1a;
+            --secondary-bg: #151a30;
+            --card-bg: #1e2340;
+            --primary-accent: #7b68ee;  /* Medium slate blue */
+            --secondary-accent: #4d5bce; /* Royal blue */
+            --tertiary-accent: #9370db;  /* Medium purple */
+            --text-primary: #ffffff;
+            --text-secondary: #d8d8ff;
+            --text-muted: #a2a2d0;
+            --success-color: #4cd964;
+            --warning-color: #ffcc00;
+            --danger-color: #ff3b30;
+            --border-color: #2a2f4e;
+            --highlight-color: #7355f7;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--primary-bg);
+            color: var(--text-primary);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+        
+        .sidebar {
+            width: 250px;
+            background: linear-gradient(135deg, #32397f, #1e2340);
+            color: var(--text-primary);
+            height: 100vh;
+            padding: 1.5rem 1rem;
+            box-shadow: 3px 0 15px rgba(0, 0, 0, 0.4);
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 100;
+        }
+        
+        .siem-logo {
+            background: linear-gradient(90deg, #7b68ee, #4a00e0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: bold;
+            margin-bottom: 2rem;
+            text-align: center;
+            font-size: 1.8rem;
+            text-shadow: 0 0 20px rgba(123, 104, 238, 0.8);
+            letter-spacing: 1px;
+        }
+        
+        .sidebar a {
+            color: var(--text-primary);
+            text-decoration: none;
+            display: block;
+            margin: 0.8rem 0;
+            padding: 0.8rem 1rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .sidebar a:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            transition: all 0.5s ease;
+        }
+        
+        .sidebar a:hover:before {
+            left: 100%;
+        }
+        
+        .sidebar a:hover {
+            background: linear-gradient(90deg, rgba(123, 104, 238, 0.2), rgba(123, 104, 238, 0.4));
+            color: white;
+            transform: translateX(5px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+        
+        .content {
+            flex: 1;
+            padding: 2rem;
+            margin-left: 250px;
+            width: calc(100% - 250px);
+        }
+        
+        h1, h2, h3, h4, h5, h6 {
+            color: var(--tertiary-accent);
+            margin-bottom: 1.5rem;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+            text-shadow: 0 0 15px rgba(147, 112, 219, 0.4);
+        }
+        
+        .card {
+            background: linear-gradient(145deg, #1e2340, #1a1e38);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+            margin-bottom: 1.5rem;
+            border-radius: 12px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 20px rgba(123, 104, 238, 0.2);
+        }
+        
+        .card-header {
+            background: linear-gradient(90deg, rgba(123, 104, 238, 0.1), rgba(77, 91, 206, 0.2));
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem;
+            border-top-left-radius: 12px !important;
+            border-top-right-radius: 12px !important;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-accent), var(--secondary-accent));
+            border-color: var(--primary-accent);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, var(--secondary-accent), var(--primary-accent));
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(123, 104, 238, 0.4);
+        }
+        
+        .btn-secondary {
+            background-color: #3a3f5d;
+            border-color: #3a3f5d;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+        }
+        
+        .form-control {
+            background-color: #262b4a;
+            border-color: var(--border-color);
+            color: var(--text-primary);
+            border-radius: 8px;
+        }
+        
+        .form-control:focus {
+            background-color: #2d3253;
+            color: var(--text-primary);
+            border-color: var(--primary-accent);
+            box-shadow: 0 0 0 0.25rem rgba(123, 104, 238, 0.25);
+        }
+        
+        .form-select {
+            background-color: #262b4a;
+            border-color: var(--border-color);
+            color: var(--text-primary);
+            border-radius: 8px;
+        }
+        
+        .form-select:focus {
+            background-color: #2d3253;
+            border-color: var(--primary-accent);
+            box-shadow: 0 0 0 0.25rem rgba(123, 104, 238, 0.25);
+        }
+        
+        select.form-control option {
+            background-color: #2d3253;
+            color: var(--text-primary);
+        }
+        
+        pre {
+            background-color: #1a1e2e;
+            color: #e0e0ff;
+            padding: 1rem;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.2);
+        }
+        
+        #particles-js {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+        
+        /* Custom scrollbar for better UX */
+        ::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: var(--secondary-bg);
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary-accent);
+            border-radius: 5px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--tertiary-accent);
+        }
+        
+        /* Badge styling */
+        .badge {
+            padding: 0.5em 0.7em;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            border-radius: 6px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            background-color: var(--tertiary-accent);
+        }
+    </style>
     {% block head %}{% endblock %}
 </head>
 <body>
@@ -61,15 +238,20 @@
 
     <div class="sidebar">
         <h2 class="siem-logo">SIEM-lite</h2>
-        <a href="/">Home</a>
-        <a href="/file">Choose File</a>
-        <a href="/search">Search Logs</a>
-        <a href="/alerts">Alerts</a>
-        <a href="/alerts">Visualize</a>
-        <a href="/test_AI">Test AI</a>
+        <a href="/"><i class="fas fa-home me-2"></i>Home</a>
+        <a href="/file"><i class="fas fa-file-alt me-2"></i>View Logs</a>
+        <a href="/search"><i class="fas fa-search me-2"></i>Search Logs</a>
+        <a href="/alerts"><i class="fas fa-bell me-2"></i>Alerts</a>
+        <a href="/visualize"><i class="fas fa-chart-bar me-2"></i>Visualize</a>
+        <a href="/test_AI"><i class="fas fa-robot me-2"></i>AI Analysis</a>
     </div>
     <div class="content">
         {% block content %}{% endblock %}
+        
+        <footer class="mt-5 pt-4 border-top border-secondary text-center text-muted">
+            <p>© 2025 SIEM-lite. All rights reserved.</p>
+            <p class="small">Built with security in mind.</p>
+        </footer>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>

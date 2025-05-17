@@ -1,163 +1,184 @@
 {% extends "base.html" %}
 
 {% block head %}
-
     <title>Elasticsearch Log Search</title>
     <style>
-        /* body {
-            font-family: Arial, sans-serif;
-            font-size: 16px;
-            line-height: 1.5;
-            margin: 0;
-            padding: 0;
-            display: flex;
-        } */
-        /* .sidebar {
-            width: 250px;
-            background-color: #0056b3;
-            color: white;
-            height: 100vh;
-            padding: 1rem;
-            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
-        }
-        .sidebar a {
-            color: white;
-            text-decoration: none;
-            display: block;
-            margin: 1rem 0;
-            font-weight: bold;
-        }
-        .sidebar a:hover {
-            text-decoration: underline;
-        } */
         .content {
             flex: 1;
             padding: 2rem;
-            background-color: #f9f9f9;
+            background-color: var(--primary-bg);
         }
         
         form { 
-            background: #fff; 
+            background: var(--card-bg); 
             padding: 1.5rem; 
             border-radius: 8px; 
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); 
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2); 
             margin-bottom: 2rem; 
+            border: 1px solid var(--border-color);
         }
+        
         label { 
             display: block; 
             margin-bottom: 0.5rem; 
-            font-weight: bold; 
+            font-weight: 500; 
+            color: var(--text-primary);
         }
+        
         input[type="text"], input[type="number"] { 
             width: 100%; 
-            padding: 0.5rem; 
-            margin-bottom: 1rem; 
-            border: 1px solid #ccc; 
+            padding: 0.75rem; 
+            margin-bottom: 1.5rem; 
+            border: 1px solid var(--border-color); 
             border-radius: 4px; 
             font-size: 1rem;
+            background-color: #333;
+            color: var(--text-primary);
+            transition: all 0.3s ease;
         }
+        
+        input[type="text"]:focus, input[type="number"]:focus {
+            outline: none;
+            border-color: var(--primary-accent);
+            box-shadow: 0 0 0 2px rgba(106, 90, 205, 0.25);
+        }
+        
         button { 
-            background-color: #0056b3; 
+            background-color: var(--secondary-accent); 
             color: white; 
             border: none; 
             padding: 0.75rem 1.5rem; 
             border-radius: 4px; 
             cursor: pointer; 
             font-size: 1rem; 
+            transition: all 0.3s ease;
         }
+        
         button:hover { 
-            background-color: #004494; 
+            background-color: var(--primary-accent); 
+            transform: translateY(-2px);
         }
+        
         .error { 
-            color: red; 
+            color: var(--danger-color); 
             font-weight: bold; 
             margin-top: 1rem; 
+            padding: 1rem;
+            background-color: rgba(244, 67, 54, 0.1);
+            border-radius: 4px;
         }
+        
         .results { 
             margin-top: 2rem; 
         }
+        
         .result { 
-            background: #fff; 
-            border: 1px solid #ddd; 
-            padding: 1rem; 
+            background: var(--card-bg); 
+            border: 1px solid var(--border-color); 
+            padding: 1.25rem; 
             border-radius: 8px; 
             margin-bottom: 1rem; 
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); 
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2); 
+            transition: all 0.3s ease;
         }
+        
+        .result:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(106, 90, 205, 0.3);
+            border-left: 3px solid var(--secondary-accent);
+        }
+        
         .result .index { 
             font-size: 0.9em; 
-            color: gray; 
+            color: var(--text-secondary); 
+            margin-bottom: 0.5rem;
         }
+        
         .result .score { 
             font-size: 0.9em; 
-            color: #555; 
+            color: var(--text-secondary); 
+            margin-bottom: 0.5rem;
         }
+        
         .result .source { 
-            margin-top: 0.5rem; 
+            margin-top: 1rem; 
             font-family: monospace; 
-            background: #f4f4f4; 
-            padding: 0.5rem; 
+            background: rgba(0, 0, 0, 0.2); 
+            padding: 1rem; 
             border-radius: 4px; 
             text-align: left;
+            border: 1px solid var(--border-color);
         }
+        
         .json-key { 
-            color: #0056b3; 
+            color: #9fa8da; 
             font-weight: bold; 
         }
+        
         .json-value { 
-            color: #333; 
+            color: var(--text-primary); 
+        }
+        
+        .checkbox-wrapper {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .checkbox-wrapper input[type="checkbox"] {
+            margin-right: 8px;
         }
     </style>
 {% endblock %}
 
 {% block content %}
-        <h1>Elasticsearch Log Search</h1>
-        <form method="POST">
-            <label for="field">Field:</label>
-            <input type="text" id="field" name="field" value="{{ field }}" placeholder="Enter field name (optional)">
-            
-            <label for="query">Query:</label>
-            <input type="text" id="query" name="query" value="{{ query }}" placeholder="Enter your search query" required>
-            
-            <label for="size">Results Size:</label>
-            <input type="number" id="size" name="size" value="{{ size }}" min="1" placeholder="Enter number of results">
-            
-            <label for="use_regex">
-                <input type="checkbox" id="use_regex" name="use_regex">
-                Use Regex
+    <h1>Elasticsearch Log Search</h1>
+    <form method="POST">
+        <label for="field">Field:</label>
+        <input type="text" id="field" name="field" value="{{ field }}" placeholder="Enter field name (optional)">
+        
+        <label for="query">Query:</label>
+        <input type="text" id="query" name="query" value="{{ query }}" placeholder="Enter your search query" required>
+        
+        <label for="size">Results Size:</label>
+        <input type="number" id="size" name="size" value="{{ size }}" min="1" placeholder="Enter number of results">
+        
+        <div class="checkbox-wrapper">
+            <input type="checkbox" id="use_regex" name="use_regex" {% if use_regex %}checked{% endif %}>
+            <label for="use_regex" style="display: inline; margin-bottom: 0;">
+                Use Regular Expressions
             </label>
-            <br>
-            <button type="submit">Search</button>
-        </form>
+        </div>
+        
+        <button type="submit">Search</button>
+    </form>
 
-        {% if error %}
-            <p class="error">{{ error }}</p>
-        {% endif %}
+    {% if error %}
+        <div class="error">{{ error }}</div>
+    {% endif %}
 
-        {% if results is not none %}
-            <div class="results">
-                <h2>Results:</h2>
-                {% if results|length == 0 %}
-                    <p>No results found for your query.</p>
-                {% else %}
-                    {% for result in results %}
-                        <div class="result">
-                            <div class="index"><strong>Index:</strong> {{ result._index }}</div>
-                            <div class="score"><strong>Score:</strong> {{ result._score }}</div>
-                            <div class="score"><strong>Source:</strong></div>
-                            <div class="source">
-                                {% for key, value in result._source.items() %}
-                                    <span class="json-key">{{ key }}:</span> 
-                                    <span class="json-value">{{ value }}</span>
-                                    <br>
-                                {% endfor %}
-                            </div>
+    {% if results is not none %}
+        <div class="results">
+            <h2>Search Results</h2>
+            {% if results|length == 0 %}
+                <p>No results found for your query.</p>
+            {% else %}
+                <p>Found {{ results|length }} result(s)</p>
+                {% for result in results %}
+                    <div class="result">
+                        <div class="index"><strong>Index:</strong> {{ result._index }}</div>
+                        <div class="score"><strong>Score:</strong> {{ result._score }}</div>
+                        <div class="score"><strong>Source:</strong></div>
+                        <div class="source">
+                            {% for key, value in result._source.items() %}
+                                <span class="json-key">{{ key }}:</span> 
+                                <span class="json-value">{{ value }}</span>
+                                <br>
+                            {% endfor %}
                         </div>
-                    {% endfor %}
-                {% endif %}
-            </div>
-        {% else %}
-            <p>No results found for your query.</p>
-        {% endif %}
-    </div>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        </div>
+    {% endif %}
 {% endblock %}

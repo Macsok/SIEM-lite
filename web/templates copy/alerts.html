@@ -1,0 +1,65 @@
+
+{% extends "base.html" %}
+
+{% block head %}
+    <title>Security Alerts</title>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+{% endblock %}
+
+{% block content %}
+    <h1>ALERTS</h1>
+
+    {% if alerts %}
+        {% for alert in alerts %}
+            <div class="card custom-alert">
+                <div class="card-body">
+                    <h5 class="alert-title">{{ alert.type }}</h5>
+
+                    <div class="d-flex align-items-center gap-2 mt-2">
+                        <span class="badge severity-{{ alert.severity|lower }}">{{ alert.severity }}</span>
+                        <small class="alert-time">{{ alert.time }}</small>
+                    </div>
+
+                    <pre class="alert-message mt-3">{{ alert.message }}</pre>
+
+                    <button class="btn btn-outline-light btn-sm mt-3"
+                            onclick="showAlertDetails({{ alert | tojson }}, {{ loop.index0 }})">
+                        Details
+                    </button>
+                </div>
+            </div>
+        {% endfor %}
+
+        <!-- Modal for alert details -->
+        <div class="modal fade" id="alertModal" tabindex="-1" aria-labelledby="alertModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-scrollable">
+                <div class="modal-content bg-dark text-light">
+                    <div class="modal-header border-secondary">
+                        <h5 class="modal-title">Alert Details</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body" id="modalBody">
+                        <!-- Filled dynamically -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    {% else %}
+        <p>No alerts detected.</p>
+    {% endif %}
+
+    <script>
+        function showAlertDetails(alert, index) {
+            const modalBody = document.getElementById("modalBody");
+            modalBody.innerHTML = `
+                <p><strong>Type:</strong> ${alert.type}</p>
+                <p><strong>Severity:</strong> ${alert.severity}</p>
+                <p><strong>Time:</strong> ${alert.time}</p>
+                <pre><code>${alert.message}</code></pre>
+            `;
+            const modal = new bootstrap.Modal(document.getElementById("alertModal"));
+            modal.show();
+        }
+    </script>
+{% endblock %}
