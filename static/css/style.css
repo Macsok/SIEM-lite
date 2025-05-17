@@ -1,0 +1,194 @@
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Inter', sans-serif;
+  background: #0d1117;
+  color: #c9d1d9;
+  color: #c9d1d9;
+}
+
+.sidebar {
+  font-size: 16px;
+  width: 250px;
+  background-color: #0b5ed7;
+  color: white;
+  height: 100vh;
+  padding: 1rem;
+  position: fixed;
+  top: 0;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar a {
+  color: white;
+  text-decoration: none;
+  font-weight: bold;
+  margin: 1rem 0;
+  display: block;
+  transition: 0.2s;
+}
+
+.sidebar a:hover {
+  text-decoration: underline;
+}
+
+.main-content {
+  margin-left: 250px;
+  padding: 2rem;
+  background-color: #0d1117;
+  min-height: 100vh;
+  position: relative;
+  z-index: 1;
+}
+
+h1, h2, h3, h4, h5 {
+  color: #58a6ff;
+}
+
+.card {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 12px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+
+.btn {
+  border-radius: 8px !important;
+  font-weight: 500;
+  transition: 0.2s;
+}
+
+.btn-primary {
+  background-color: #238636;
+  border-color: #238636;
+}
+
+.btn-primary:hover {
+  background-color: #2ea043;
+  border-color: #2ea043;
+}
+
+pre {
+  background-color: #161b22;
+  padding: 1rem;
+  border-radius: 8px;
+  overflow-x: auto;
+  color: #c9d1d9;
+}
+.custom-alert {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  padding: 1rem;
+  color: #c9d1d9;
+}
+
+.alert-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #58a6ff;
+}
+
+.alert-time {
+  color: #8b949e;
+  font-size: 0.9rem;
+}
+
+.alert-message {
+  background-color: #161b22;
+  color: #c9d1d9;
+  padding: 1rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+  margin-top: 1rem;
+}
+
+.badge {
+  padding: 0.4em 0.6em;
+  border-radius: 0.5rem;
+  font-size: 0.8rem;
+}
+
+.severity-low {
+  background-color: #2ea043;
+  color: #fff;
+}
+
+.severity-medium {
+  background-color: #d29922;
+  color: #fff;
+}
+
+.severity-high {
+  background-color: #da3633;
+  color: #fff;
+}
+
+.content {
+  margin-left: 250px;
+  padding: 2rem;
+  background: transparent;
+  min-height: 100vh;
+  position: relative;
+  z-index: 1;
+}
+
+.siem-logo {
+  font-family: 'Inter', sans-serif;
+  font-weight: 800;
+  font-size: 1.8rem;
+  color: #ffffff;
+  text-align: center;
+  margin-bottom: 2rem;
+  background: linear-gradient(90deg, #58a6ff, #c084fc);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shine 5s infinite linear;
+}
+
+@keyframes shine {
+  0% {
+    background-position: 0%;
+  }
+  100% {
+    background-position: 200%;
+  }
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  background: linear-gradient(-45deg, #1a237e, #0d47a1, #1565c0, #1e88e5);
+  background-size: 400% 400%;
+  animation: animatedBackground 20s ease infinite;
+  z-index: -1;
+  opacity: 0.08;
+}
+
+@keyframes animatedBackground {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+#particles-js {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  background-color: #0d1117;
+}
