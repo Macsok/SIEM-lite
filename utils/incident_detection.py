@@ -2,7 +2,7 @@ import os
 import json
 from datetime import datetime
 
-ALERTS_FILE = "alerts.json"
+ALERTS_FILE = "utils/alerts.json"
 
 def add_alert(alert):
     alerts = []

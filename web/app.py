@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, jsonify
 import requests
-from scripts.incident_detection import add_alert, generate_alert_from_ai_response
+from utils.incident_detection import add_alert, generate_alert_from_ai_response
 from werkzeug.utils import secure_filename
 import sys
 import os
@@ -9,7 +9,7 @@ import csv
 
 
 # Konfiguracja ścieżek
-SCRIPT_DIR = os.path.join(os.path.dirname(__file__), '../scripts')
+SCRIPT_DIR = os.path.join(os.path.dirname(__file__), '../utils')
 TEMPLATE_DIR = os.path.join(os.path.dirname(__file__), 'templates')
 
 sys.path.append(SCRIPT_DIR)
@@ -120,9 +120,9 @@ def search():
 def alerts():
     alerts = []
 
-    if os.path.exists("scripts/alerts.json"):
+    if os.path.exists("utils/alerts.json"):
         try:
-            with open("scripts/alerts.json", "r", encoding="utf-8") as f:
+            with open("utils/alerts.json", "r", encoding="utf-8") as f:
                 alerts = json.load(f)
         except Exception as e:
             print("Error loading AI alerts:", e)
@@ -197,11 +197,11 @@ def test_ai():
                     )
 
                     ai_text = response.text.strip()
-                    if ai_text:
-                        from scripts.incident_detection import generate_alert_from_ai_response, add_alert
-                        alert = generate_alert_from_ai_response(ai_text)
-                        add_alert(alert)
-                        print("AI ALERT GENERATED AND SAVED:", alert)
+                    # if ai_text:
+                    #     from utils.incident_detection import generate_alert_from_ai_response, add_alert
+                    #     alert = generate_alert_from_ai_response(ai_text)
+                    #     add_alert(alert)
+                    #     print("AI ALERT GENERATED AND SAVED:", alert)
 
             except Exception as e:
                 print("AI analysis failed:", e)
@@ -234,7 +234,7 @@ def analyze_log():
         )
         ai_text = getattr(response, "text", "").strip()
         if ai_text:
-            from scripts.incident_detection import generate_alert_from_ai_response, add_alert
+            from utils.incident_detection import generate_alert_from_ai_response, add_alert
             alert = generate_alert_from_ai_response(ai_text)
             add_alert(alert)
             print("AI ALERT SAVED:", alert)
