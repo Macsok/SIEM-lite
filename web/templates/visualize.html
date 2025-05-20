@@ -12,94 +12,112 @@
             font-size: 2rem;
             font-weight: bold;
         }
+        .form-select, .btn {
+            transition: all 0.3s ease;
+        }
+        .form-select:focus {
+            border-color: var(--primary-accent);
+            box-shadow: 0 0 0 2px rgba(106, 90, 205, 0.25);
+            outline: none;
+        }
     </style>
 {% endblock %}
 
 {% block content %}
     <h1 class="mb-4">Visualize</h1>
 
-    <div class="row mb-4">
-        <div class="col-md-4">
-            <div class="card text-white bg-dark shadow-sm rounded-3">
-                <div class="card-body">
-                    <h6 class="card-title">Total Logs</h6>
+    <!-- Wybór pliku logu -->
+    <form method="POST" action="{{ url_for('visualize') }}" class="mb-5 p-4 bg-card-bg rounded shadow-sm">
+        <div class="row g-3 align-items-end">
+            <div class="col-md-8">
+                <label for="selected_file" class="form-label">Wybierz plik logu:</label>
+                <select id="selected_file" name="selected_file" class="form-select">
+                    <option value="" disabled {% if not selected_file %}selected{% endif %}>-- wybierz plik --</option>
+                    {% for f in available_files %}
+                        <option value="{{ f }}" {% if f == selected_file %}selected{% endif %}>{{ f }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-4 text-end">
+                <button type="submit" class="btn btn-primary w-100">Pokaż dane</button>
+            </div>
+        </div>
+    </form>
+
+
+    {% if selected_file %}
+        <div class="row mb-4">
+
+            <!-- Total Logs -->
+            <div class="col-md-4">
+                <div class="card text-white bg-dark shadow-sm rounded-3 p-3">
+                    <h6 class="card-title">Total Logs ({{ selected_file }})</h6>
                     <h3 class="card-text">{{ total_logs }}</h3>
                 </div>
             </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card text-white bg-primary shadow-sm rounded-3">
-                <div class="card-body">
+
+            <!-- Total Alerts -->
+            <div class="col-md-4">
+                <div class="card text-white bg-primary shadow-sm rounded-3 p-3">
                     <h6 class="card-title">Total Alerts</h6>
                     <h3 class="card-text">{{ alerts|length }}</h3>
                 </div>
             </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card text-white bg-danger shadow-sm rounded-3">
-                <div class="card-body">
+
+            <!-- Critical Alerts -->
+            <div class="col-md-4">
+                <div class="card text-white bg-danger shadow-sm rounded-3 p-3">
                     <h6 class="card-title">Critical Alerts</h6>
                     <h3 class="card-text">
                         {{ alerts | selectattr('severity', 'equalto', 'High') | list | length }}
                     </h3>
                 </div>
             </div>
+
         </div>
-    </div>
 
-    <h2 class="mt-5 mb-3">Liczba logów w czasie</h2>
-<canvas id="logChart" width="100%" height="40"></canvas>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-const ctx = document.getElementById('logChart').getContext('2d');
-const logChart = new Chart(ctx, {
-    type: 'line',
-    data: {
-        labels: {{ log_dates|tojson }},
-        datasets: [{
-            label: 'Logi na dzień',
-            data: {{ log_counts|tojson }},
-            borderColor: 'rgba(54, 162, 235, 1)',
-            backgroundColor: 'rgba(54, 162, 235, 0.2)',
-            pointRadius: 4,
-            pointHoverRadius: 6,
-            tension: 0.3,
-            fill: true
-        }]
-    },
-    options: {
-        responsive: true,
-        plugins: {
-            legend: {
-                labels: { color: '#fff' }
-            }
-        },
-        scales: {
-            x: {
-                title: {
-                    display: true,
-                    text: 'Data',
-                    color: '#ccc'
-                },
-                ticks: {
-                    color: '#ccc'
-                }
+        <!-- Wykres logów w czasie -->
+        <h2 class="mt-5 mb-3">Liczba logów w czasie</h2>
+        <canvas id="logChart" width="100%" height="40"></canvas>
+
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script>
+        const ctx = document.getElementById('logChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: {{ log_dates|tojson }},
+                datasets: [{
+                    label: 'Logi na dzień',
+                    data: {{ log_counts|tojson }},
+                    borderWidth: 2,
+                    tension: 0.3,
+                    fill: true
+                }]
             },
-            y: {
-                title: {
-                    display: true,
-                    text: 'Liczba logów',
-                    color: '#ccc'
+            options: {
+                responsive: true,
+                scales: {
+                    x: {
+                        title: { display: true, text: 'Data' },
+                        ticks: { color: '#ccc' }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        title: { display: true, text: 'Liczba logów' },
+                        ticks: { color: '#ccc' }
+                    }
                 },
-                ticks: {
-                    beginAtZero: true,
-                    color: '#ccc'
+                plugins: {
+                    legend: {
+                        labels: { color: '#fff' }
+                    }
                 }
             }
-        }
-    }
-});
-</script>
-
+        });
+        </script>
+    {% else %}
+        <p class="text-secondary">Wybierz plik logu powyżej, aby zobaczyć statystyki i wykres.</p>
+    {% endif %}
 {% endblock %}

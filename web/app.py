@@ -248,20 +248,15 @@ def analyze_log():
         print("Error in analyze_log")
         return jsonify({"error": str(e)}), 500
 
-def get_total_logs():
-    # Przykład: zliczanie wszystkich linii z plików w folderze logs
-    logs_folder = os.path.join(os.path.dirname(__file__), "../logs")
+def get_total_logs_for_file(file_path):
     total = 0
-
-    for root, _, files in os.walk(logs_folder):
-        for file in files:
-            try:
-                file_path = os.path.join(root, file)
-                with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
-                    total += sum(1 for _ in f)
-            except Exception as e:
-                print(f"Błąd wczytywania pliku {file_path}: {e}")
+    try:
+        with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
+            total = sum(1 for _ in f)
+    except Exception as e:
+        print(f"Error reading {file_path}: {e}")
     return total
+
 
 def get_alerts():
     alerts = []
@@ -275,44 +270,57 @@ def get_alerts():
 
 def extract_timestamp(line):
     try:
-        match_win = re.search(r"\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}", line)
-        if match_win:
-            return datetime.strptime(match_win.group(), "%Y-%m-%d %H:%M:%S")
-
-        match_lin = re.search(r"[A-Z][a-z]{2} \d{1,2} \d{2}:\d{2}:\d{2}", line)
-        if match_lin:
-            dt = datetime.strptime(match_lin.group(), "%b %d %H:%M:%S")
-            return dt.replace(year=datetime.now().year)
-    except:
-        return None
+        match = re.search(r"[A-Z][a-z]{2} \d{1,2} \d{2}:\d{2}:\d{2} \d{4}", line)
+        if match:
+            return datetime.strptime(match.group(), "%b %d %H:%M:%S %Y")
+    except Exception as e:
+        print(f"Błąd parsowania pełnej daty: {e}")
+    return None
 
 
-def get_log_counts_by_date():
-    logs_folder = os.path.join(os.path.dirname(__file__), "../logs")
+def get_log_counts_by_date_for_file(file_path):
     counts = defaultdict(int)
-    for root, _, files in os.walk(logs_folder):
-        for file in files:
-            file_path = os.path.join(root, file)
-            try:
-                with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
-                    for line in f:
-                        timestamp = extract_timestamp(line)
-                        if timestamp:
-                            date_str = timestamp.date().isoformat()
-                            counts[date_str] += 1
-            except:
-                pass
+    try:
+        with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
+            for line in f:
+                ts = extract_timestamp(line)
+                if ts:
+                    counts[ts.date().isoformat()] += 1
+    except Exception as e:
+        print(f"Error reading {file_path}: {e}")
     return sorted(counts.items())
 
-@app.route("/visualize")
+@app.route("/visualize", methods=["GET", "POST"])
 def visualize():
-    alerts = get_alerts()
-    total_logs = get_total_logs()
-    log_counts_by_date = get_log_counts_by_date()
-    dates = [d for d, _ in log_counts_by_date]
-    counts = [c for _, c in log_counts_by_date]
-    return render_template("visualize.html", alerts=alerts, total_logs=total_logs, log_dates=dates, log_counts=counts)
+    logs_folder = os.path.join(os.path.dirname(__file__), "../logs")
+    available_files = []
+    for root, _, files in os.walk(logs_folder):
+        for fname in files:
+            available_files.append(os.path.relpath(os.path.join(root, fname), logs_folder))
 
+    selected_file = None
+    total_logs = 0
+    log_dates, log_counts = [], []
+    alerts = get_alerts()
+
+    if request.method == "POST":
+        selected_file = request.form.get("selected_file")
+        if selected_file:
+            abs_path = os.path.join(logs_folder, selected_file)
+            total_logs = get_total_logs_for_file(abs_path)
+            data = get_log_counts_by_date_for_file(abs_path)
+            log_dates = [d for d, _ in data]
+            log_counts = [c for _, c in data]
+
+    return render_template(
+        "visualize.html",
+        available_files=available_files,
+        selected_file=selected_file,
+        total_logs=total_logs,
+        alerts=alerts,
+        log_dates=log_dates,
+        log_counts=log_counts
+    )
 
 def run_app():
     app.run(debug=True)
