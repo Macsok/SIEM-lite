@@ -32,14 +32,14 @@
             <div class="col-md-8">
                 <label for="selected_file" class="form-label">Wybierz plik logu:</label>
                 <select id="selected_file" name="selected_file" class="form-select">
-                    <option value="" disabled {% if not selected_file %}selected{% endif %}>-- wybierz plik --</option>
+                    <option value="" disabled {% if not selected_file %}selected{% endif %}>-- Choose a file --</option>
                     {% for f in available_files %}
                         <option value="{{ f }}" {% if f == selected_file %}selected{% endif %}>{{ f }}</option>
                     {% endfor %}
                 </select>
             </div>
             <div class="col-md-4 text-end">
-                <button type="submit" class="btn btn-primary w-100">Pokaż dane</button>
+                <button type="submit" class="btn btn-primary w-100">Display</button>
             </div>
         </div>
     </form>
@@ -78,7 +78,7 @@
 
 
         <!-- Wykres logów w czasie -->
-        <h2 class="mt-5 mb-3">Liczba logów w czasie</h2>
+        <h2 class="mt-5 mb-3">Number of logs over time</h2>
         <canvas id="logChart" width="100%" height="40"></canvas>
 
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -89,7 +89,7 @@
             data: {
                 labels: {{ log_dates|tojson }},
                 datasets: [{
-                    label: 'Logi na dzień',
+                    label: 'Logs per day',
                     data: {{ log_counts|tojson }},
                     borderWidth: 2,
                     tension: 0.3,
@@ -118,6 +118,6 @@
         });
         </script>
     {% else %}
-        <p class="text-secondary">Wybierz plik logu powyżej, aby zobaczyć statystyki i wykres.</p>
+        <p class="text-secondary">Select the log file above to see statistics and a chart.</p>
     {% endif %}
 {% endblock %}
