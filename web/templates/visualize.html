@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+
+{% block head %}
+    <title>Visualize</title>
+    <style>
+        .card-title {
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            color: #cccccc;
+        }
+        .card-text {
+            font-size: 2rem;
+            font-weight: bold;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <h1 class="mb-4">Visualize</h1>
+
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card text-white bg-dark shadow-sm rounded-3">
+                <div class="card-body">
+                    <h6 class="card-title">Total Logs</h6>
+                    <h3 class="card-text">{{ total_logs }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-white bg-primary shadow-sm rounded-3">
+                <div class="card-body">
+                    <h6 class="card-title">Total Alerts</h6>
+                    <h3 class="card-text">{{ alerts|length }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-white bg-danger shadow-sm rounded-3">
+                <div class="card-body">
+                    <h6 class="card-title">Critical Alerts</h6>
+                    <h3 class="card-text">
+                        {{ alerts | selectattr('severity', 'equalto', 'High') | list | length }}
+                    </h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <h2 class="mt-5 mb-3">Liczba logów w czasie</h2>
+<canvas id="logChart" width="100%" height="40"></canvas>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const ctx = document.getElementById('logChart').getContext('2d');
+const logChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: {{ log_dates|tojson }},
+        datasets: [{
+            label: 'Logi na dzień',
+            data: {{ log_counts|tojson }},
+            borderColor: 'rgba(54, 162, 235, 1)',
+            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+            pointRadius: 4,
+            pointHoverRadius: 6,
+            tension: 0.3,
+            fill: true
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                labels: { color: '#fff' }
+            }
+        },
+        scales: {
+            x: {
+                title: {
+                    display: true,
+                    text: 'Data',
+                    color: '#ccc'
+                },
+                ticks: {
+                    color: '#ccc'
+                }
+            },
+            y: {
+                title: {
+                    display: true,
+                    text: 'Liczba logów',
+                    color: '#ccc'
+                },
+                ticks: {
+                    beginAtZero: true,
+                    color: '#ccc'
+                }
+            }
+        }
+    }
+});
+</script>
+
+{% endblock %}

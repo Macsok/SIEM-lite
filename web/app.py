@@ -1,3 +1,5 @@
+import re
+
 from flask import Flask, render_template, request, jsonify
 import requests
 from utils.incident_detection import add_alert, generate_alert_from_ai_response
@@ -6,6 +8,8 @@ import sys
 import os
 import json
 import csv
+from collections import defaultdict
+from datetime import datetime
 
 
 # Konfiguracja ścieżek
@@ -243,6 +247,72 @@ def analyze_log():
     except Exception as e:
         print("Error in analyze_log")
         return jsonify({"error": str(e)}), 500
+
+def get_total_logs():
+    # Przykład: zliczanie wszystkich linii z plików w folderze logs
+    logs_folder = os.path.join(os.path.dirname(__file__), "../logs")
+    total = 0
+
+    for root, _, files in os.walk(logs_folder):
+        for file in files:
+            try:
+                file_path = os.path.join(root, file)
+                with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
+                    total += sum(1 for _ in f)
+            except Exception as e:
+                print(f"Błąd wczytywania pliku {file_path}: {e}")
+    return total
+
+def get_alerts():
+    alerts = []
+    try:
+        with open("utils/alerts.json", "r", encoding="utf-8") as f:
+            alerts = json.load(f)
+    except Exception as e:
+        print("Error loading alerts in get_alerts():", e)
+    return alerts
+
+
+def extract_timestamp(line):
+    try:
+        match_win = re.search(r"\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}", line)
+        if match_win:
+            return datetime.strptime(match_win.group(), "%Y-%m-%d %H:%M:%S")
+
+        match_lin = re.search(r"[A-Z][a-z]{2} \d{1,2} \d{2}:\d{2}:\d{2}", line)
+        if match_lin:
+            dt = datetime.strptime(match_lin.group(), "%b %d %H:%M:%S")
+            return dt.replace(year=datetime.now().year)
+    except:
+        return None
+
+
+def get_log_counts_by_date():
+    logs_folder = os.path.join(os.path.dirname(__file__), "../logs")
+    counts = defaultdict(int)
+    for root, _, files in os.walk(logs_folder):
+        for file in files:
+            file_path = os.path.join(root, file)
+            try:
+                with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
+                    for line in f:
+                        timestamp = extract_timestamp(line)
+                        if timestamp:
+                            date_str = timestamp.date().isoformat()
+                            counts[date_str] += 1
+            except:
+                pass
+    return sorted(counts.items())
+
+@app.route("/visualize")
+def visualize():
+    alerts = get_alerts()
+    total_logs = get_total_logs()
+    log_counts_by_date = get_log_counts_by_date()
+    dates = [d for d, _ in log_counts_by_date]
+    counts = [c for _, c in log_counts_by_date]
+    return render_template("visualize.html", alerts=alerts, total_logs=total_logs, log_dates=dates, log_counts=counts)
+
 
 def run_app():
     app.run(debug=True)
