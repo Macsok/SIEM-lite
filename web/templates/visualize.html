@@ -30,7 +30,7 @@
     <form method="POST" action="{{ url_for('visualize') }}" class="mb-5 p-4 bg-card-bg rounded shadow-sm">
         <div class="row g-3 align-items-end">
             <div class="col-md-8">
-                <label for="selected_file" class="form-label">Wybierz plik logu:</label>
+                <label for="selected_file" class="form-label">Select a log file:</label>
                 <select id="selected_file" name="selected_file" class="form-select">
                     <option value="" disabled {% if not selected_file %}selected{% endif %}>-- Choose a file --</option>
                     {% for f in available_files %}
@@ -105,7 +105,7 @@
                     },
                     y: {
                         beginAtZero: true,
-                        title: { display: true, text: 'Liczba logów' },
+                        title: { display: true, text: 'Number of logs' },
                         ticks: { color: '#ccc' }
                     }
                 },
