@@ -280,11 +280,6 @@ def extract_timestamp(line):
         if match_full:
             return datetime.strptime(match_full.group(), "%b %d %H:%M:%S %Y")
 
-        # Format: May 21 12:34:56 (pomijany)
-        # match_short = re.search(r"[A-Z][a-z]{2} \d{1,2} \d{2}:\d{2}:\d{2}", line)
-        # if match_short:
-        #     return datetime.strptime(match_short.group(), "%b %d %H:%M:%S")
-
     except Exception as e:
         print(f"Błąd parsowania daty: {e}")
         return None
